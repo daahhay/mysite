@@ -28,6 +28,10 @@ nav a {
     margin-right:1rem
 }
 
+nav li.right {
+    margin-left: auto;
+}
+
 h1, h2, h3 {
     color: #333;
     font-family:system-ui, Helvetica, Arial, sans-serif
