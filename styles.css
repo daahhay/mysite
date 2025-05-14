@@ -15,7 +15,10 @@ body {
 }
 
 nav {
-    margin:1rem 0 3rem
+    margin:1rem 0 3rem;
+    display: block;
+    padding: 10px;
+    background-color: #A41034
 }
 
 nav li {
@@ -25,7 +28,8 @@ nav li {
 }
 
 nav a {
-    margin-right:1rem
+    margin-right:1rem;
+    color: #ffffff;
 }
 
 nav li.right {
@@ -44,7 +48,7 @@ h1 {
 
 .global-title {
     font-size: 3rem;
-    color:#222
+    color:#000
 }
 
 h2 {
