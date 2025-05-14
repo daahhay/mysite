@@ -98,7 +98,8 @@ img {
 }
 
 .greeting-container {
-    display:flex
+    display:flex;
+    justify-content: center
 }
 
 .greeting-container h3 {
