@@ -342,17 +342,21 @@ def editor_page():
 
 
 IMAGE_LOADER = """<style>
-#image-loader {position:fixed;inset:0;margin:auto;padding:0;border:0;background:transparent;color:#a64750}
+#image-loader {position:fixed;inset:0;margin:auto;padding:0;border:0;outline:0;box-shadow:none;overflow:visible;background:transparent;color:#a64750}
 #image-loader::backdrop {background:#fff}
-#image-loader svg {display:block;width:48px;height:48px}
+#image-loader svg {display:block;width:59px;height:72px}
 #image-loader .fill {clip-path:inset(var(--remaining,100%) 0 0);transition:clip-path .18s linear}
 @media (prefers-reduced-motion:reduce) {#image-loader .fill {transition:none}}
 </style>
 <dialog id="image-loader" aria-label="Loading images">
-<svg viewBox="0 0 32 32" aria-hidden="true">
-<defs><path id="loading-heart" d="M16 28C13 25 3 18 3 10a7 7 0 0 1 13-3.5A7 7 0 0 1 29 10c0 8-10 15-13 18Z"/></defs>
-<use href="#loading-heart" fill="none" stroke="currentColor" stroke-width="1.4"/>
-<use class="fill" href="#loading-heart" fill="currentColor"/>
+<svg viewBox="3 1 54 66" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+  <path id="loading-heart" d="M11 24 9 10l6-1 2 12 4-2c-1-6 0-10 4-13l-1-3 4-1 2 4 2-1V2h4l1 4 2 1 2-4 4 2-2 5c3 3 4 6 4 10l6-2 2 5-9 5c5 7 7 18 6 30-.2 5-1 8-4 8-10-2-24-8-32-17C5 40 3 31 7 26Z"/>
+  <path id="heart-detail" d="M17 21q-5 1-7 7m15-7c-1-5 1-10 5-11 5-2 10 2 10 8m-20 14c4-11 10-16 17-16l10 4m-23 16c4-9 12-12 22-13m-26 8c2 4 6 5 10 7s6 7 7 12l6 9m-12-19 8-3 4-4m-8 15-5 3m7-1 6 2"/>
+  <g id="heart-ink"><use href="#loading-heart" stroke-width="1.6"/><use href="#heart-detail" fill="none" stroke-width="1.35"/></g>
+</defs>
+<use href="#heart-ink" stroke="currentColor"/>
+<g class="fill"><use href="#loading-heart" fill="currentColor" stroke="currentColor" stroke-width="1.6"/><use href="#heart-detail" stroke="#fff" stroke-width="1.35"/></g>
 </svg></dialog>
 <script>
 (() => {
