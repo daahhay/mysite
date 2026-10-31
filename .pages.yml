@@ -1,0 +1,121 @@
+media:
+  input: media/blog
+  output: /media/blog
+  rename: safe
+  extensions: [jpg, jpeg, png, webp, gif, avif, mp4, webm]
+content:
+  - name: posts
+    label: Blog articles
+    type: collection
+    path: content/blog
+    format: json
+    filename: "{fields.slug}.json"
+    subfolders: false
+    view:
+      primary: title
+      fields: [title, published, date, category]
+      sort: date
+      order: desc
+    fields:
+      - name: title
+        label: Article title
+        type: string
+        required: true
+      - name: slug
+        label: Page address
+        type: string
+        required: true
+        description: "Use lowercase English letters, numbers and hyphens, e.g. arterial-lines. The page will be /blog/arterial-lines/. Keep this unchanged after publishing."
+      - name: published
+        label: Publish on website
+        type: boolean
+        default: false
+        description: "Leave off while writing. Turn on and save to publish. Drafts are excluded from the website, but source files are visible in this public GitHub repository."
+      - name: date
+        label: Article date
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: language
+        label: Article language
+        type: select
+        default: en
+        options:
+          values:
+            - value: en
+              label: English
+            - value: ru
+              label: Русский
+      - name: category
+        label: Topic
+        type: string
+        default: Notes
+      - name: excerpt
+        label: Short introduction
+        type: text
+        required: true
+        description: Appears on the blog overview and below the article title.
+      - name: cover
+        label: Cover image
+        type: image
+      - name: cover_alt
+        label: Cover image description
+        type: string
+        description: Describe the image for readers who cannot see it.
+      - name: cover_caption
+        label: Image caption / credit
+        type: string
+      - name: body
+        label: Article
+        type: rich-text
+        options:
+          format: html
+        description: "Write and format your article. Use Heading 2 for sections (these become the contents menu). Insert images and links using the toolbar."
+      - name: sections
+        label: Additional sections & videos
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{fields.title}"
+        description: Add and reorder sections for more text, pictures or a video at any point after the main article.
+        fields:
+          - name: title
+            label: Section heading
+            type: string
+          - name: body
+            label: Text & pictures
+            type: rich-text
+            options:
+              format: html
+          - name: video_url
+            label: Video link
+            type: string
+            description: Paste a YouTube, Vimeo, or direct .mp4/.webm URL. Other video links display as a Watch video button.
+          - name: video_caption
+            label: Video caption / credit
+            type: string
+          - name: video_file
+            label: Or upload a short video
+            type: file
+            options:
+              extensions: [mp4, webm]
+              rename: safe
+            description: "Optional MP4/WebM clip. For large videos, use a YouTube or Vimeo link instead. If both are filled in, the video link is used."
+      - name: references
+        label: References & useful links
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{fields.title}"
+        fields:
+          - name: title
+            label: Reference title
+            type: string
+            required: true
+          - name: url
+            label: Link
+            type: string
+            required: true

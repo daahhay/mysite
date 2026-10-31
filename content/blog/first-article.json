@@ -1,0 +1,15 @@
+{
+  "title": "Your first article — draft template",
+  "slug": "first-article",
+  "published": false,
+  "date": "2026-10-31",
+  "language": "en",
+  "category": "Notes",
+  "excerpt": "Replace this introduction with a short overview of your article. This draft is not included on the public website.",
+  "cover": "",
+  "cover_alt": "",
+  "cover_caption": "",
+  "body": "<h2>Introduction</h2><p>Start your article here. Use the toolbar for <strong>bold</strong>, <em>italics</em>, lists, pictures and links.</p><h2>A closer look</h2><p>Break your article into short sections. Heading 2 creates an entry in the article’s contents menu.</p><blockquote>A short takeaway or important idea can go here.</blockquote><h2>Key takeaways</h2><ul><li>Add your first takeaway.</li><li>Add another useful point.</li></ul>",
+  "sections": [{"title": "Watch & learn", "body": "<p>Add a video URL below, or remove this optional section.</p>", "video_url": "", "video_caption": ""}],
+  "references": []
+}
