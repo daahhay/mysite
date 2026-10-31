@@ -2,7 +2,7 @@ media:
   input: media/blog
   output: /media/blog
   rename: safe
-  extensions: [jpg, jpeg, png, webp, gif, avif, mp4, webm]
+  extensions: [jpg, jpeg, png, webp, gif, avif, mp4, webm, pdf, pptx]
 content:
   - name: posts
     label: Blog articles
@@ -86,6 +86,23 @@ content:
       - name: cover_caption
         label: Image caption / credit
         type: string
+      - name: attachments
+        label: Downloadable attachments
+        type: object
+        list: true
+        description: Add documents to display below the cover image, in the order listed.
+        fields:
+          - name: file
+            label: PDF or PowerPoint file
+            type: file
+            required: true
+            options:
+              extensions: [pdf, pptx]
+              rename: safe
+          - name: title
+            label: Download label (optional)
+            type: string
+            description: Leave blank to use the filename.
       - name: body
         label: Article
         type: rich-text

@@ -9,10 +9,9 @@ from pathlib import Path
 import re
 import shutil
 from datetime import date
-from urllib.parse import urlsplit, parse_qs, urlencode
+from urllib.parse import urlsplit, parse_qs, urlencode, unquote, quote
 
 ORIGIN = 'https://tamerlanerdniev.ru'
-AUTHOR = 'Tamerlan Erdniev'
 
 
 def esc(value):
@@ -176,7 +175,7 @@ def frame(title, description, path, content, lang='en', noindex=False):
 </head><body><a class="skip" href="#main">Skip to content</a>
 <header class="blog-header"><div class="wordmark" aria-label="Tamerlan Erdniev"><span class="brand">te<span>.</span></span><span class="owner-name">Tamerlan Erdniev</span></div></header>
 <main class="blog-main" id="main">{content}</main>
-<footer class="blog-footer"><span>Tamerlan Erdniev</span><span>Cardiology · Sechenov University</span><a href="/blog/edit/">Manage blog ↗</a></footer>
+<footer class="blog-footer"><span>Tamerlan Erdniev</span><a href="/blog/edit/">Manage blog ↗</a></footer>
 </body></html>'''
 
 
@@ -235,7 +234,7 @@ def load_posts(root, include_drafts=False):
                 raise ValueError('Language must be en or ru')
             post['topics'] = labels([str(post.get('category') or 'Notes')] + labels(post.get('topics')))
             post['tags'] = labels(post.get('tags'))
-            for field in ('sections', 'references'):
+            for field in ('sections', 'references', 'attachments'):
                 post[field] = post.get(field) or []
                 if not isinstance(post[field], list) or not all(isinstance(x, dict) for x in post[field]):
                     raise ValueError(f'{field} must be a list')
@@ -293,12 +292,28 @@ def index_page(posts):
     return frame('Blog', 'Notes, perspectives and articles by Tamerlan Erdniev.', '/blog/', hero + body)
 
 
+def attachment_links(items, is_ru):
+    if not items:
+        return ''
+    links = []
+    for item in items:
+        path = unquote(str(item.get('file') or ''))
+        kind = Path(path).suffix.lower()
+        if not path.startswith('/media/blog/') or '..' in path.split('/') or kind not in ('.pdf', '.pptx'):
+            raise ValueError('Choose a PDF or PPTX attachment from the blog media library')
+        url = quote(path, safe='/')
+        label = item.get('title') or Path(path).name
+        links.append(f'<li><a download href="{esc(url)}"><span class="file-icon">{kind[1:].upper()}</span>{esc(label)}</a></li>')
+    heading = 'Скачать материалы' if is_ru else 'Download materials'
+    return f'<section class="attachments"><h2>{heading}</h2><ul>{"".join(links)}</ul></section>'
+
+
 def article_page(post, newer=None, older=None, preview=False):
     is_ru = post['language'] == 'ru'
     toc_label = 'В ЭТОЙ СТАТЬЕ' if is_ru else 'IN THIS ARTICLE'
     refs_label = 'Источники и ссылки' if is_ru else 'References & further reading'
     meta = f'<div class="post-meta"><span class="topic">{esc(post.get("category") or "Notes")}</span><span>·</span><time datetime="{post["date"]}">{display_date(post)}</time><span>· {post["minutes"]} min read</span></div>'
-    title = f'''<div class="breadcrumb"><a href="/blog/">← All articles</a></div><div class="article-head">{meta}<h1>{esc(post['title'])}</h1><p class="article-deck">{esc(post['excerpt'])}</p>{taxonomy_links(post)}<div class="byline"><img src="/Pics/avatar.jpg" alt="" width="38" height="38"><div>{AUTHOR}<br><span>Sechenov University</span></div></div></div>'''
+    title = f'''<div class="breadcrumb"><a href="/blog/">← All articles</a></div><div class="article-head">{meta}<h1>{esc(post['title'])}</h1><p class="article-deck">{esc(post['excerpt'])}</p>{taxonomy_links(post)}</div>'''
     cover = ''
     if post.get('cover'):
         cover = f'<figure class="article-cover"><img src="{esc(safe_url(post["cover"], media=True))}" alt="{esc(post.get("cover_alt"))}">' + (f'<figcaption>{esc(post["cover_caption"])}</figcaption>' if post.get('cover_caption') else '') + '</figure>'
@@ -314,7 +329,7 @@ def article_page(post, newer=None, older=None, preview=False):
     navigation += (f'<a href="{post_url(older)}"><span>OLDER ARTICLE →</span>{esc(older["title"])}</a>' if older else '<a href="/blog/"><span>KEEP EXPLORING</span>All articles →</a>')
     navigation += '</nav>'
     banner = '<div class="draft-banner">LOCAL PREVIEW · This draft is not published</div>' if preview and not post.get('published') else ''
-    return frame(post['title'], post['excerpt'], post_url(post), banner + title + cover + body + navigation, lang=post['language'], noindex=preview)
+    return frame(post['title'], post['excerpt'], post_url(post), banner + title + cover + attachment_links(post["attachments"], is_ru) + body + navigation, lang=post['language'], noindex=preview)
 
 
 def palette_panel():
