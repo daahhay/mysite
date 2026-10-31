@@ -342,24 +342,27 @@ def editor_page():
 
 
 IMAGE_LOADER = """<style>
-#image-loader {position:fixed;inset:0;margin:auto;padding:0;border:0;outline:0;box-shadow:none;overflow:visible;background:transparent;color:#a64750}
+#image-loader {position:fixed;inset:0;margin:auto;padding:0;border:0;outline:0;box-shadow:none;overflow:visible;background:transparent;color:#111}
 #image-loader::backdrop {background:#fff}
-#image-loader svg {display:block;width:59px;height:72px}
+#image-loader svg {display:block;width:65px;height:72px;animation:heart-beat 1s ease-in-out infinite}
 #image-loader .fill {clip-path:inset(6% 0 0);transition:clip-path .2s linear}
 #image-loader[open]:not(.ready) .fill {animation:heart-loading 1.8s linear both}
 #image-loader.ready .fill {clip-path:inset(0)}
+@keyframes heart-beat {0%,40%,100% {transform:scale(1)} 10% {transform:scale(1.09)} 20% {transform:scale(1.015)} 29% {transform:scale(1.055)}}
 @keyframes heart-loading {from {clip-path:inset(100% 0 0)} to {clip-path:inset(6% 0 0)}}
-@media (prefers-reduced-motion:reduce) {#image-loader[open] .fill {animation:none!important;transition:none}}
+@media (prefers-reduced-motion:reduce) {#image-loader svg,#image-loader[open] .fill {animation:none!important;transition:none}}
 </style>
 <dialog id="image-loader" aria-label="Loading images">
-<svg viewBox="3 1 54 66" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<svg viewBox="184 113 1234 1375" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round">
 <defs>
-  <path id="loading-heart" d="M12 22 10 11l6-1 2 10 4-2c-1-5 1-10 5-12l-1-4 4-1 2 4h3l2-4 4 2-2 5c3 2 5 6 5 10l7-2 2 5-10 5c7 8 9 21 7 35-.5 4-2 5-5 4C29 60 10 50 6 36c-2-7 0-11 6-14Z"/>
-  <path id="heart-detail" d="M22 25c4-8 12-11 24-7M45 26c-9 0-16 4-20 11 5 3 10 8 14 16"/>
-  <g id="heart-ink"><use href="#loading-heart" stroke-width="1.6"/><use href="#heart-detail" fill="none" stroke-width="1.35"/></g>
+  <g id="heart-ink" stroke-width="70">
+    <path d="M375 545V208h157l3 302M527 507c3-150 121-269 275-269 97 0 185 39 239 120M680 252l-25-74m145 54v-80m111 91 27-65"/>
+    <path d="M704 585c15-63 2-116 42-158 40-43 80-20 123-17 64 6 125-23 189-44l168-53 43 121-182 66c-38 14-67 20-99 23M1191 557l142-47 45 120-88 29"/>
+    <path d="M672 807c65-123 150-266 305-282 188-24 329 127 328 289 0 216-225 467-541 635C471 1287 220 1031 222 813c2-170 134-290 286-290 108 0 205 54 251 147"/>
+  </g>
 </defs>
-<use href="#heart-ink" stroke="currentColor"/>
-<g class="fill"><use href="#loading-heart" fill="currentColor" stroke="currentColor" stroke-width="1.6"/><use href="#heart-detail" stroke="#fff" stroke-width="1.35"/></g>
+<use href="#heart-ink" stroke="#d6d6d6"/>
+<g class="fill"><use href="#heart-ink" stroke="currentColor"/></g>
 </svg></dialog>
 <script>
 (() => {
