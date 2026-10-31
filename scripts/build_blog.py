@@ -380,7 +380,7 @@ def editor_page():
 
 IMAGE_LOADER = """<style>
 #image-loader {position:fixed;inset:0;margin:auto;padding:0;border:0;outline:0;box-shadow:none;overflow:visible;background:transparent;color:#111}
-#image-loader::backdrop {background:#fff}
+#image-loader::backdrop {background:var(--paper,#f7f6f0)}
 #image-loader svg {display:block;width:65px;height:72px;animation:heart-beat 1s ease-in-out infinite}
 #image-loader .fill {clip-path:inset(6% 0 0);transition:clip-path .2s linear}
 #image-loader[open]:not(.ready) .fill {animation:heart-loading 1.8s linear both}
