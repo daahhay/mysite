@@ -361,8 +361,10 @@ IMAGE_LOADER = """<style>
     <path d="M672 807c65-123 150-266 305-282 188-24 329 127 328 289 0 216-225 467-541 635C471 1287 220 1031 222 813c2-170 134-290 286-290 108 0 205 54 251 147"/>
   </g>
 </defs>
-<use href="#heart-ink" stroke="#d6d6d6"/>
-<g class="fill"><use href="#heart-ink" stroke="currentColor"/></g>
+<g class="fill" fill="#c52c40">
+  <path d="M375 558V208h157l3 191Q633 238 802 238c97 0 185 39 239 120l185-45 43 121-180 66q65 15 102 57l142-47 45 120-88 29q16 75 15 155c0 216-225 467-541 635C471 1287 220 1031 222 813q0-163 153-255Z"/>
+</g>
+<use href="#heart-ink" stroke="currentColor"/>
 </svg></dialog>
 <script>
 (() => {
