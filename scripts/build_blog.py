@@ -129,6 +129,27 @@ class ArticleHTML(HTMLParser):
         return ''.join(self.parts)
 
 
+def introduction(value):
+    # Older articles store literal text. Make their existing web references clickable.
+    if not re.search(r'<(?:p|a|strong|em|div|span|br|h[1-6])\b', value, re.I):
+        parts = []
+        start = 0
+        for match in re.finditer(r"""https?://[^\s<>"']+""", value):
+            url = match.group().rstrip('.,;:!?')
+            if not safe_url(url):
+                continue
+            parts.extend([esc(value[start:match.start()]), f'<a href="{esc(url)}">{esc(url)}</a>'])
+            start = match.start() + len(url)
+        parts.append(esc(value[start:]))
+        return '<p>' + ''.join(parts) + '</p>', value
+    parser = ArticleHTML()
+    parser.allowed = {'p', 'br', 'a', 'strong', 'b', 'em', 'i', 'u', 's'}
+    parser.feed(value)
+    rendered = parser.finish()
+    description = html.unescape(re.sub(r'<[^>]+>', '', rendered.replace('</p>', ' ').replace('<br>', ' '))).strip()
+    return rendered, description
+
+
 def video_block(url, caption=''):
     url = safe_url(url, media=True)
     if not url:
@@ -222,6 +243,7 @@ def load_posts(root, include_drafts=False):
             for field in ('title', 'slug', 'date', 'excerpt'):
                 if not isinstance(post.get(field), str) or not post[field].strip():
                     raise ValueError(f'{field} is required')
+            post['excerpt_html'], post['excerpt_text'] = introduction(post['excerpt'])
             slug = post['slug']
             if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', slug) or slug in ('edit',):
                 raise ValueError('Page address must contain only lowercase English letters, numbers and single hyphens; "edit" is reserved')
@@ -274,7 +296,7 @@ def card(post):
     image = (f'<img src="{esc(safe_url(post["cover"], media=True))}" alt="{esc(post.get("cover_alt"))}" loading="lazy" width="800" height="450">' if post.get('cover') else f'<div class="cover-type" aria-hidden="true"><span>{category.upper()}</span><strong>te.</strong><span>FROM THE NOTEBOOK</span></div>')
     return f'''<article class="post-card" data-language="{post['language']}" data-topics="{esc(json.dumps(post['topics'], ensure_ascii=False))}" data-tags="{esc(json.dumps(post['tags'], ensure_ascii=False))}"><a class="post-cover" href="{url}" aria-label="{title}">{image}</a>
 <div class="post-meta"><span class="topic">{category}</span><span>·</span><time datetime="{post['date']}">{display_date(post)}</time><span>· {post['minutes']} min read</span></div>
-<h2 lang="{post['language']}"><a href="{url}">{title}</a></h2><p lang="{post['language']}">{esc(post['excerpt'])}</p>{taxonomy_links(post)}<a class="read-link" href="{url}" aria-label="Read {title}">Read article <span aria-hidden="true">↗</span></a></article>'''
+<h2 lang="{post['language']}"><a href="{url}">{title}</a></h2><div class="introduction" lang="{post['language']}">{post['excerpt_html']}</div>{taxonomy_links(post)}<a class="read-link" href="{url}" aria-label="Read {title}">Read article <span aria-hidden="true">↗</span></a></article>'''
 
 
 def index_page(posts):
@@ -313,7 +335,7 @@ def article_page(post, newer=None, older=None, preview=False):
     toc_label = 'В ЭТОЙ СТАТЬЕ' if is_ru else 'IN THIS ARTICLE'
     refs_label = 'Источники и ссылки' if is_ru else 'References & further reading'
     meta = f'<div class="post-meta"><span class="topic">{esc(post.get("category") or "Notes")}</span><span>·</span><time datetime="{post["date"]}">{display_date(post)}</time><span>· {post["minutes"]} min read</span></div>'
-    title = f'''<div class="breadcrumb"><a href="/blog/">← All articles</a></div><div class="article-head">{meta}<h1>{esc(post['title'])}</h1><p class="article-deck">{esc(post['excerpt'])}</p>{taxonomy_links(post)}</div>'''
+    title = f'''<div class="breadcrumb"><a href="/blog/">← All articles</a></div><div class="article-head">{meta}<h1>{esc(post['title'])}</h1><div class="article-deck introduction">{post['excerpt_html']}</div>{taxonomy_links(post)}</div>'''
     cover = ''
     if post.get('cover'):
         cover = f'<figure class="article-cover"><img src="{esc(safe_url(post["cover"], media=True))}" alt="{esc(post.get("cover_alt"))}">' + (f'<figcaption>{esc(post["cover_caption"])}</figcaption>' if post.get('cover_caption') else '') + '</figure>'
@@ -329,7 +351,7 @@ def article_page(post, newer=None, older=None, preview=False):
     navigation += (f'<a href="{post_url(older)}"><span>OLDER ARTICLE →</span>{esc(older["title"])}</a>' if older else '<a href="/blog/"><span>KEEP EXPLORING</span>All articles →</a>')
     navigation += '</nav>'
     banner = '<div class="draft-banner">LOCAL PREVIEW · This draft is not published</div>' if preview and not post.get('published') else ''
-    return frame(post['title'], post['excerpt'], post_url(post), banner + title + cover + attachment_links(post["attachments"], is_ru) + body + navigation, lang=post['language'], noindex=preview)
+    return frame(post['title'], post['excerpt_text'], post_url(post), banner + title + cover + attachment_links(post["attachments"], is_ru) + body + navigation, lang=post['language'], noindex=preview)
 
 
 def palette_panel():

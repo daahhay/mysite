@@ -73,9 +73,12 @@ content:
         description: "Add keywords one per item, e.g. echocardiography, heart failure or ultrasound. Readers can click a tag or use the tag filter."
       - name: excerpt
         label: Short introduction
-        type: text
+        type: rich-text
+        options:
+          format: html
+          media: false
         required: true
-        description: Appears on the blog overview and below the article title.
+        description: Select words and use the link button to add a URL. Links appear on the blog overview and below the article title.
       - name: cover
         label: Cover image
         type: image
