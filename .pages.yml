@@ -43,19 +43,29 @@ content:
         default: en
         options:
           values:
-            - value: en
+            - name: en
               label: English
-            - value: ru
+            - name: ru
               label: Русский
       - name: category
         label: Primary topic
-        type: string
+        type: reference
         default: Notes
+        description: Choose a saved topic. To add a new one, save it in Topics first.
+        options:
+          collection: topic_library
+          search: fields.title
+          value: "{primary}"
+          label: "{primary}"
       - name: topics
         label: Additional topics
-        type: string
-        list: true
-        description: "Add any other topics for this article, one per item, e.g. Cardiology or Critical care. All topics are searchable on the blog."
+        type: reference
+        options:
+          collection: topic_library
+          multiple: true
+          search: fields.title
+          value: "{primary}"
+          label: "{primary}"
       - name: tags
         label: Tags
         type: string
@@ -129,3 +139,15 @@ content:
             label: Link
             type: string
             required: true
+  - name: topic_library
+    label: Topics
+    type: collection
+    path: content/topics
+    format: json
+    view:
+      primary: title
+    fields:
+      - name: title
+        label: Topic name
+        type: string
+        required: true

@@ -273,7 +273,7 @@ def card(post):
     url, title = post_url(post), esc(post['title'])
     category = esc(post.get('category') or 'Notes')
     image = (f'<img src="{esc(safe_url(post["cover"], media=True))}" alt="{esc(post.get("cover_alt"))}" loading="lazy" width="800" height="450">' if post.get('cover') else f'<div class="cover-type" aria-hidden="true"><span>{category.upper()}</span><strong>te.</strong><span>FROM THE NOTEBOOK</span></div>')
-    return f'''<article class="post-card" data-topics="{esc(json.dumps(post['topics'], ensure_ascii=False))}" data-tags="{esc(json.dumps(post['tags'], ensure_ascii=False))}"><a class="post-cover" href="{url}" aria-label="{title}">{image}</a>
+    return f'''<article class="post-card" data-language="{post['language']}" data-topics="{esc(json.dumps(post['topics'], ensure_ascii=False))}" data-tags="{esc(json.dumps(post['tags'], ensure_ascii=False))}"><a class="post-cover" href="{url}" aria-label="{title}">{image}</a>
 <div class="post-meta"><span class="topic">{category}</span><span>·</span><time datetime="{post['date']}">{display_date(post)}</time><span>· {post['minutes']} min read</span></div>
 <h2 lang="{post['language']}"><a href="{url}">{title}</a></h2><p lang="{post['language']}">{esc(post['excerpt'])}</p>{taxonomy_links(post)}<a class="read-link" href="{url}" aria-label="Read {title}">Read article <span aria-hidden="true">↗</span></a></article>'''
 
@@ -287,9 +287,9 @@ def index_page(posts):
         tags = sorted(labels([t for p in posts for t in p['tags']]), key=str.lower)
         options = ''.join(f'<option value="{esc(t)}">{esc(t)}</option>' for t in topics)
         tag_options = ''.join(f'<option value="{esc(t)}">{esc(t)}</option>' for t in tags)
-        body = f'''<div class="blog-toolbar"><label for="article-search">SEARCH <input id="article-search" type="search" placeholder="Articles, topics, tags…" autocomplete="off"></label><label for="article-topic">TOPIC <select id="article-topic"><option value="">All topics</option>{options}</select></label><label for="article-tag">TAG <select id="article-tag"><option value="">All tags</option>{tag_options}</select></label><button class="reset-filters" id="clear-filters" type="button">Clear filters</button></div>
+        body = f'''<div class="blog-toolbar"><label for="article-search">SEARCH <input id="article-search" type="search" placeholder="Articles, topics, tags…" autocomplete="off"></label><label for="article-topic">TOPIC <select id="article-topic"><option value="">All topics</option>{options}</select></label><label for="article-tag">TAG <select id="article-tag"><option value="">All tags</option>{tag_options}</select></label><label for="article-language">LANGUAGE <select id="article-language"><option value="">All languages</option><option value="en">English</option><option value="ru">Русский</option></select></label><button class="reset-filters" id="clear-filters" type="button">Clear filters</button></div>
 <p class="result-count" id="result-count" role="status">{len(posts)} articles</p><div class="post-grid">{''.join(card(p) for p in posts)}</div>
-<div class="no-results" id="no-results" hidden><h2>No matching articles</h2><p>Try another search, topic or tag, or clear the filters above.</p></div><script src="/blog/blog.js" defer></script>'''
+<div class="no-results" id="no-results" hidden><h2>No matching articles</h2><p>Try another search, topic, tag or language, or clear the filters above.</p></div><script src="/blog/blog.js" defer></script>'''
     return frame('Blog', 'Notes, perspectives and articles by Tamerlan Erdniev.', '/blog/', hero + body)
 
 
