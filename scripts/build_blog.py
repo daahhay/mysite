@@ -341,6 +341,46 @@ def editor_page():
     return frame('Manage your blog', 'Write, illustrate and publish your articles.', '/blog/edit/', '''<section class="editor-intro"><a class="eyebrow" href="/blog/">← BACK TO THE BLOG</a><h1>Your writing desk.</h1><p>Write an article, add pictures and videos, then publish when you’re ready.</p><a class="button" href="https://app.pagescms.org/">Open visual editor <span>↗</span></a>''' + palette_panel() + '''<ol class="editor-steps"><li><h2>Connect once</h2><p>Sign in to Pages CMS with GitHub. Install its GitHub app for <strong>daahhay/mysite</strong>, then open that repository and choose <strong>main</strong>. The article editor is already configured.</p></li><li><h2>Write & illustrate</h2><p>Open <strong>Blog articles</strong>, then add an article or edit the draft template. Enter a title, page address and short introduction. Use the formatting toolbar for headings, links and pictures. Add video links or upload short MP4/WebM clips under <strong>Additional sections & videos</strong>. Add sources under <strong>References & useful links</strong>.</p></li><li><h2>Save a draft or publish</h2><p>Keep <strong>Publish on website</strong> off while writing. Turn it on and save when ready. Your article appears at <strong>/blog/your-page-address/</strong> after deployment finishes, usually within a few minutes. Turn it off and save to remove the article from the website.</p></li></ol><div class="editor-note"><strong>Drafts & media</strong><p>Drafts stay off the website, but this GitHub repository is public: draft files and uploaded media can be read there. Use YouTube or Vimeo links for large videos. Article dates are display dates, not a publishing schedule.</p></div><p><a href="https://github.com/daahhay/mysite/actions">Check publishing status ↗</a> · <a href="https://pagescms.org/docs/quick-start/">Editor setup help ↗</a></p></section>''', noindex=True)
 
 
+IMAGE_LOADER = """<style>
+#image-loader {position:fixed;inset:0;margin:auto;padding:0;border:0;background:transparent;color:#a64750}
+#image-loader::backdrop {background:#fff}
+#image-loader svg {display:block;width:48px;height:48px}
+#image-loader .fill {clip-path:inset(var(--remaining,100%) 0 0);transition:clip-path .18s linear}
+@media (prefers-reduced-motion:reduce) {#image-loader .fill {transition:none}}
+</style>
+<dialog id="image-loader" aria-label="Loading images">
+<svg viewBox="0 0 32 32" aria-hidden="true">
+<defs><path id="loading-heart" d="M16 28C13 25 3 18 3 10a7 7 0 0 1 13-3.5A7 7 0 0 1 29 10c0 8-10 15-13 18Z"/></defs>
+<use href="#loading-heart" fill="none" stroke="currentColor" stroke-width="1.4"/>
+<use class="fill" href="#loading-heart" fill="currentColor"/>
+</svg></dialog>
+<script>
+(() => {
+  const loader = document.getElementById('image-loader');
+  if (!loader.showModal) return;
+  const reveal = () => loader.remove();
+  loader.showModal();
+  document.addEventListener('DOMContentLoaded', async () => {
+    const images = Array.from(document.images);
+    let remaining = images.length;
+    await Promise.all(images.map(async image => {
+      image.loading = 'eager';
+      try {
+        if (image.decode) await image.decode();
+        else if (!image.complete) await new Promise(resolve => {
+          image.addEventListener('load', resolve, {once:true});
+          image.addEventListener('error', resolve, {once:true});
+        });
+      } catch { /* A missing picture should not block the page. */ }
+      remaining -= 1;
+      loader.style.setProperty('--remaining', (100 * remaining / images.length) + '%');
+    }));
+    setTimeout(reveal, images.length && !matchMedia('(prefers-reduced-motion:reduce)').matches ? 190 : 0);
+  }, {once:true});
+})();
+</script>"""
+
+
 def build(root, output, include_drafts=False):
     root, output = root.resolve(), output.resolve()
     if output == root or output in root.parents:
@@ -373,6 +413,10 @@ def build(root, output, include_drafts=False):
         newer = posts[index - 1] if index else None
         older = posts[index + 1] if index + 1 < len(posts) else None
         (target / 'index.html').write_text(article_page(post, newer, older, include_drafts), encoding='utf-8')
+    for page in output.rglob('*.html'):
+        html = page.read_text(encoding='utf-8')
+        if '<body>' in html and 'http-equiv="refresh"' not in html.lower():
+            page.write_text(html.replace('<body>', '<body>' + IMAGE_LOADER, 1), encoding='utf-8')
     urls = ['/', '/main_ru.html']
     sitemap = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join(f'<url><loc>{ORIGIN}{u}</loc></url>' for u in urls) + '</urlset>'
     (output / 'sitemap.xml').write_text(sitemap, encoding='utf-8')
