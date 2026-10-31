@@ -345,8 +345,11 @@ IMAGE_LOADER = """<style>
 #image-loader {position:fixed;inset:0;margin:auto;padding:0;border:0;outline:0;box-shadow:none;overflow:visible;background:transparent;color:#a64750}
 #image-loader::backdrop {background:#fff}
 #image-loader svg {display:block;width:59px;height:72px}
-#image-loader .fill {clip-path:inset(var(--remaining,100%) 0 0);transition:clip-path .18s linear}
-@media (prefers-reduced-motion:reduce) {#image-loader .fill {transition:none}}
+#image-loader .fill {clip-path:inset(6% 0 0);transition:clip-path .3s linear}
+#image-loader[open]:not(.ready) .fill {animation:heart-loading 4.7s linear both}
+#image-loader.ready .fill {clip-path:inset(0)}
+@keyframes heart-loading {from {clip-path:inset(100% 0 0)} to {clip-path:inset(6% 0 0)}}
+@media (prefers-reduced-motion:reduce) {#image-loader[open] .fill {animation:none!important;transition:none}}
 </style>
 <dialog id="image-loader" aria-label="Loading images">
 <svg viewBox="3 1 54 66" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -364,9 +367,10 @@ IMAGE_LOADER = """<style>
   if (!loader.showModal) return;
   const reveal = () => loader.remove();
   loader.showModal();
+  loader.addEventListener('cancel', event => event.preventDefault());
+  const minimumFill = new Promise(resolve => setTimeout(resolve, 4700));
   document.addEventListener('DOMContentLoaded', async () => {
     const images = Array.from(document.images);
-    let remaining = images.length;
     await Promise.all(images.map(async image => {
       image.loading = 'eager';
       try {
@@ -376,10 +380,10 @@ IMAGE_LOADER = """<style>
           image.addEventListener('error', resolve, {once:true});
         });
       } catch { /* A missing picture should not block the page. */ }
-      remaining -= 1;
-      loader.style.setProperty('--remaining', (100 * remaining / images.length) + '%');
     }));
-    setTimeout(reveal, images.length && !matchMedia('(prefers-reduced-motion:reduce)').matches ? 190 : 0);
+    await minimumFill;
+    loader.classList.add('ready');
+    setTimeout(reveal, 300);
   }, {once:true});
 })();
 </script>"""
