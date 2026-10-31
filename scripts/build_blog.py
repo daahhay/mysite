@@ -156,12 +156,11 @@ def frame(title, description, path, content, lang='en', noindex=False):
     return f'''<!doctype html>
 <html lang="{esc(lang)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(title)} — Tamerlan Erdniev</title><meta name="description" content="{esc(description)}">
-<link rel="canonical" href="{ORIGIN}{path}">{'<meta name="robots" content="noindex">' if noindex else ''}
+<link rel="canonical" href="{ORIGIN}{path}"><meta name="robots" content="noindex">
 <meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{ORIGIN}{path}"><meta property="og:type" content="{'article' if path not in ('/blog/', '/blog/edit/') else 'website'}">
 <link rel="icon" type="image/svg+xml" href="/blog/favicon.svg"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/blog/blog.css">
 </head><body><a class="skip" href="#main">Skip to content</a>
-<header class="blog-header"><a class="wordmark" href="/"><span class="brand">te<span>.</span></span><span class="owner-name">Tamerlan Erdniev</span></a>
-<nav aria-label="Main navigation"><a href="/">Profile</a><a href="/#publications">Publications</a><a href="/blog/" aria-current="{'page' if path == '/blog/' else 'true'}">Blog</a><a href="/#contact">Contact</a></nav></header>
+<header class="blog-header"><div class="wordmark" aria-label="Tamerlan Erdniev"><span class="brand">te<span>.</span></span><span class="owner-name">Tamerlan Erdniev</span></div></header>
 <main class="blog-main" id="main">{content}</main>
 <footer class="blog-footer"><span>Tamerlan Erdniev</span><span>Cardiology · Sechenov University</span><a href="/blog/edit/">Manage blog ↗</a></footer>
 </body></html>'''
@@ -237,9 +236,9 @@ def card(post):
 
 
 def index_page(posts):
-    hero = '''<section class="blog-hero"><div><div class="eyebrow"><span class="dot"></span> THE NOTEBOOK</div><h1>Beyond the CV.</h1><p>Notes, perspectives, and a closer look at cardiology and clinical research.</p></div><div class="blog-note">A place to explore<br>ideas in more depth.<span>THE BLOG OF TAMERLAN ERDNIEV</span></div></section>'''
+    hero = '''<section class="blog-hero"><div><div class="eyebrow"><span class="dot"></span> THE NOTEBOOK</div><h1>Blog.</h1><p>Notes, perspectives, and a closer look at cardiology and clinical research.</p></div><div class="blog-note">A place to explore<br>ideas in more depth.<span>THE BLOG OF TAMERLAN ERDNIEV</span></div></section>'''
     if not posts:
-        body = '''<section class="blog-empty"><div class="empty-mark" aria-hidden="true">01</div><div><div class="eyebrow">A NEW CHAPTER</div><h2>The notebook is open.</h2><p>New articles will appear here. In the meantime, explore my published research and academic background.</p><a href="/#publications">Explore publications ↗</a></div></section>'''
+        body = '''<section class="blog-empty"><div class="empty-mark" aria-hidden="true">01</div><div><div class="eyebrow">A NEW CHAPTER</div><h2>The notebook is open.</h2><p>New articles will appear here.</p></div></section>'''
     else:
         topics = sorted({p.get('category') or 'Notes' for p in posts})
         options = ''.join(f'<option value="{esc(t)}">{esc(t)}</option>' for t in topics)
@@ -309,7 +308,7 @@ def build(root, output, include_drafts=False):
         newer = posts[index - 1] if index else None
         older = posts[index + 1] if index + 1 < len(posts) else None
         (target / 'index.html').write_text(article_page(post, newer, older, include_drafts), encoding='utf-8')
-    urls = ['/', '/main_ru.html', '/blog/'] + [post_url(p) for p in posts]
+    urls = ['/', '/main_ru.html']
     sitemap = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join(f'<url><loc>{ORIGIN}{u}</loc></url>' for u in urls) + '</urlset>'
     (output / 'sitemap.xml').write_text(sitemap, encoding='utf-8')
     (output / '.nojekyll').touch()

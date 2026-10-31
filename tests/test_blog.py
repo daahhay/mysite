@@ -38,7 +38,7 @@ class BlogTests(unittest.TestCase):
         self.assertIn('/blog/older/', page)
         self.assertIn('https://example.org/research', page)
         self.assertIn('https://tamerlanerdniev.ru/blog/one/', page)
-        self.assertIn('/blog/one/', (self.out / 'sitemap.xml').read_text())
+        self.assertNotIn('/blog/', (self.out / 'sitemap.xml').read_text())
         self.assertIn('value="Cardiology"', (self.out / 'blog/index.html').read_text())
         self.assertTrue((self.out / 'Pics/avatar.jpg').exists())
 

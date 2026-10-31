@@ -40,5 +40,5 @@ Check publishing at https://github.com/daahhay/mysite/actions. If publishing fai
 - `python3 scripts/build_blog.py --preview` builds a local draft-inclusive version into `_preview`. This is never uploaded by the deployment workflow.
 - `python3 -m unittest discover -s tests` verifies draft exclusion, article creation, media handling and unsafe HTML removal.
 - The deployment uploads only `_site`, not draft documents, tests, editor configuration or build scripts.
-- Root CV pages, portrait and publications are preserved. Both CV languages link to `/blog/`; each article may be written in English or Russian. Articles are not automatically translated.
+- Root CV pages, portrait and publications are preserved. The blog remains at `/blog/`, unlinked from both CV menus. Its logo is not a link to the main website. Blog pages request search-engine exclusion with `noindex` and are omitted from the sitemap; this is an unlisted public blog, not access control. Each article may be written in English or Russian. Articles are not automatically translated.
 - Hosting remains GitHub Pages using the existing domain configuration; no DNS change is needed.
