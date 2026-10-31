@@ -48,9 +48,19 @@ content:
             - value: ru
               label: Русский
       - name: category
-        label: Topic
+        label: Primary topic
         type: string
         default: Notes
+      - name: topics
+        label: Additional topics
+        type: string
+        list: true
+        description: "Add any other topics for this article, one per item, e.g. Cardiology or Critical care. All topics are searchable on the blog."
+      - name: tags
+        label: Tags
+        type: string
+        list: true
+        description: "Add keywords one per item, e.g. echocardiography, heart failure or ultrasound. Readers can click a tag or use the tag filter."
       - name: excerpt
         label: Short introduction
         type: text
@@ -71,7 +81,7 @@ content:
         type: rich-text
         options:
           format: html
-        description: "Write and format your article. Use Heading 2 for sections (these become the contents menu). Insert images and links using the toolbar."
+        description: "Heading 1 is large and centered; Heading 2 is smaller and left-aligned. Both appear in the contents menu. Insert images and links using the toolbar."
       - name: sections
         label: Additional sections & videos
         type: object

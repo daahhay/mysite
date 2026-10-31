@@ -9,7 +9,7 @@ from pathlib import Path
 import re
 import shutil
 from datetime import date
-from urllib.parse import urlsplit, parse_qs
+from urllib.parse import urlsplit, parse_qs, urlencode
 
 ORIGIN = 'https://tamerlanerdniev.ru'
 AUTHOR = 'Tamerlan Erdniev'
@@ -37,7 +37,7 @@ def safe_url(value, media=False):
 
 class ArticleHTML(HTMLParser):
     """Render only a small, safe formatting vocabulary from the visual editor."""
-    allowed = set('p br strong b em i u s del h2 h3 h4 ul ol li blockquote a img hr figure figcaption pre code table thead tbody tr th td sup sub'.split())
+    allowed = set('p br strong b em i u s del h1 h2 h3 h4 ul ol li blockquote a img hr figure figcaption pre code table thead tbody tr th td sup sub'.split())
     void = {'br', 'img', 'hr'}
     blocked = {'script', 'style', 'iframe', 'object', 'svg', 'math', 'template'}
 
@@ -68,7 +68,7 @@ class ArticleHTML(HTMLParser):
             if not url:
                 return
             rendered = f' src="{esc(url)}" alt="{esc(attrs.get("alt"))}" loading="lazy" decoding="async"'
-        elif tag == 'h2':
+        elif tag in ('h1', 'h2'):
             heading_id = f'section-{len(self.toc) + 1}'
             self.toc.append([heading_id, ''])
             self.heading = len(self.toc) - 1
@@ -96,7 +96,7 @@ class ArticleHTML(HTMLParser):
             self.parts.append(f'</{current}>')
             if current == 'table':
                 self.parts.append('</div>')
-            if current == 'h2':
+            if current in ('h1', 'h2'):
                 self.heading = None
             if current == tag:
                 break
@@ -170,6 +170,33 @@ def post_url(post):
     return '/blog/' + post['slug'] + '/'
 
 
+def labels(value):
+    """Accept editor lists and older comma-separated values; deduplicate labels."""
+    if isinstance(value, str):
+        value = value.split(',')
+    if value is None:
+        value = []
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        raise ValueError('Topics and tags must be lists of text labels')
+    result, seen = [], set()
+    for item in value:
+        item = ' '.join(item.split()).lstrip('#').strip()
+        if item and item.lower() not in seen:
+            result.append(item)
+            seen.add(item.lower())
+    return result
+
+
+def taxonomy_links(post):
+    links = []
+    for kind, values in (('topic', post['topics']), ('tag', post['tags'])):
+        for label in values:
+            url = '/blog/?' + urlencode({kind: label})
+            prefix = '#' if kind == 'tag' else ''
+            links.append(f'<a class="taxonomy-chip {kind}-chip" href="{esc(url)}" aria-label="Find articles with {kind}: {esc(label)}">{prefix}{esc(label)}</a>')
+    return '<div class="taxonomy-links" aria-label="Topics and tags">' + ''.join(links) + '</div>'
+
+
 def load_posts(root, include_drafts=False):
     posts, slugs = [], set()
     for file in sorted((root / 'content/blog').glob('*.json')):
@@ -192,6 +219,8 @@ def load_posts(root, include_drafts=False):
             post['language'] = post.get('language') or 'en'
             if post['language'] not in ('en', 'ru'):
                 raise ValueError('Language must be en or ru')
+            post['topics'] = labels([str(post.get('category') or 'Notes')] + labels(post.get('topics')))
+            post['tags'] = labels(post.get('tags'))
             for field in ('sections', 'references'):
                 post[field] = post.get(field) or []
                 if not isinstance(post[field], list) or not all(isinstance(x, dict) for x in post[field]):
@@ -230,9 +259,9 @@ def card(post):
     url, title = post_url(post), esc(post['title'])
     category = esc(post.get('category') or 'Notes')
     image = (f'<img src="{esc(safe_url(post["cover"], media=True))}" alt="{esc(post.get("cover_alt"))}" loading="lazy" width="800" height="450">' if post.get('cover') else f'<div class="cover-type" aria-hidden="true"><span>{category.upper()}</span><strong>te.</strong><span>FROM THE NOTEBOOK</span></div>')
-    return f'''<article class="post-card" data-topic="{category}"><a class="post-cover" href="{url}" aria-label="{title}">{image}</a>
+    return f'''<article class="post-card" data-topics="{esc(json.dumps(post['topics'], ensure_ascii=False))}" data-tags="{esc(json.dumps(post['tags'], ensure_ascii=False))}"><a class="post-cover" href="{url}" aria-label="{title}">{image}</a>
 <div class="post-meta"><span class="topic">{category}</span><span>·</span><time datetime="{post['date']}">{display_date(post)}</time><span>· {post['minutes']} min read</span></div>
-<h2 lang="{post['language']}"><a href="{url}">{title}</a></h2><p lang="{post['language']}">{esc(post['excerpt'])}</p><a class="read-link" href="{url}" aria-label="Read {title}">Read article <span aria-hidden="true">↗</span></a></article>'''
+<h2 lang="{post['language']}"><a href="{url}">{title}</a></h2><p lang="{post['language']}">{esc(post['excerpt'])}</p>{taxonomy_links(post)}<a class="read-link" href="{url}" aria-label="Read {title}">Read article <span aria-hidden="true">↗</span></a></article>'''
 
 
 def index_page(posts):
@@ -240,11 +269,13 @@ def index_page(posts):
     if not posts:
         body = '''<section class="blog-empty"><div class="empty-mark" aria-hidden="true">01</div><div><div class="eyebrow">A NEW CHAPTER</div><h2>The notebook is open.</h2><p>New articles will appear here.</p></div></section>'''
     else:
-        topics = sorted({p.get('category') or 'Notes' for p in posts})
+        topics = sorted(labels([t for p in posts for t in p['topics']]), key=str.lower)
+        tags = sorted(labels([t for p in posts for t in p['tags']]), key=str.lower)
         options = ''.join(f'<option value="{esc(t)}">{esc(t)}</option>' for t in topics)
-        body = f'''<div class="blog-toolbar"><label for="article-search">SEARCH <input id="article-search" type="search" placeholder="Find an article…" autocomplete="off"></label><label for="article-topic">TOPIC <select id="article-topic"><option value="">All topics</option>{options}</select></label></div>
+        tag_options = ''.join(f'<option value="{esc(t)}">{esc(t)}</option>' for t in tags)
+        body = f'''<div class="blog-toolbar"><label for="article-search">SEARCH <input id="article-search" type="search" placeholder="Articles, topics, tags…" autocomplete="off"></label><label for="article-topic">TOPIC <select id="article-topic"><option value="">All topics</option>{options}</select></label><label for="article-tag">TAG <select id="article-tag"><option value="">All tags</option>{tag_options}</select></label><button class="reset-filters" id="clear-filters" type="button">Clear filters</button></div>
 <p class="result-count" id="result-count" role="status">{len(posts)} articles</p><div class="post-grid">{''.join(card(p) for p in posts)}</div>
-<div class="no-results" id="no-results" hidden><h2>No matching articles</h2><p>Try another search or topic.</p><button class="button" id="clear-filters" type="button">Clear filters</button></div><script src="/blog/blog.js" defer></script>'''
+<div class="no-results" id="no-results" hidden><h2>No matching articles</h2><p>Try another search, topic or tag, or clear the filters above.</p></div><script src="/blog/blog.js" defer></script>'''
     return frame('Blog', 'Notes, perspectives and articles by Tamerlan Erdniev.', '/blog/', hero + body)
 
 
@@ -253,7 +284,7 @@ def article_page(post, newer=None, older=None, preview=False):
     toc_label = 'В ЭТОЙ СТАТЬЕ' if is_ru else 'IN THIS ARTICLE'
     refs_label = 'Источники и ссылки' if is_ru else 'References & further reading'
     meta = f'<div class="post-meta"><span class="topic">{esc(post.get("category") or "Notes")}</span><span>·</span><time datetime="{post["date"]}">{display_date(post)}</time><span>· {post["minutes"]} min read</span></div>'
-    title = f'''<div class="breadcrumb"><a href="/blog/">← All articles</a></div><div class="article-head">{meta}<h1>{esc(post['title'])}</h1><p class="article-deck">{esc(post['excerpt'])}</p><div class="byline"><img src="/Pics/avatar.jpg" alt="" width="38" height="38"><div>{AUTHOR}<br><span>Sechenov University</span></div></div></div>'''
+    title = f'''<div class="breadcrumb"><a href="/blog/">← All articles</a></div><div class="article-head">{meta}<h1>{esc(post['title'])}</h1><p class="article-deck">{esc(post['excerpt'])}</p>{taxonomy_links(post)}<div class="byline"><img src="/Pics/avatar.jpg" alt="" width="38" height="38"><div>{AUTHOR}<br><span>Sechenov University</span></div></div></div>'''
     cover = ''
     if post.get('cover'):
         cover = f'<figure class="article-cover"><img src="{esc(safe_url(post["cover"], media=True))}" alt="{esc(post.get("cover_alt"))}">' + (f'<figcaption>{esc(post["cover_caption"])}</figcaption>' if post.get('cover_caption') else '') + '</figure>'

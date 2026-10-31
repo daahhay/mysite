@@ -112,6 +112,40 @@ class BlogTests(unittest.TestCase):
         self.assertIn('src="/media/blog/cover.jpg" alt="Cover description"', page)
         self.assertIn('playsinline src="/media/blog/clip.mp4"', page)
 
+    def test_heading_one_is_preserved_and_linked_in_contents(self):
+        self.write_post(body='<h1>Major <em>heading</em></h1><p>Text</p><h2>Smaller heading</h2>')
+        post = blog.load_posts(self.root)[0]
+        self.assertIn('<h1 id="section-1">Major <em>heading</em></h1>', post['body_html'])
+        self.assertEqual(post['toc'], [['section-1', 'Major heading'], ['section-2', 'Smaller heading']])
+
+    def test_topics_and_tags_round_trip_and_old_articles_still_work(self):
+        self.write_post(topics=[' Critical care ', 'cardiology', 'Critical care'], tags=['echo', '#ultrasound', 'ECHO', 'Русский тег'])
+        self.write_post('legacy')
+        posts = blog.load_posts(self.root)
+        post = next(p for p in posts if p['slug'] == 'one')
+        self.assertEqual(post['topics'], ['Cardiology', 'Critical care'])
+        self.assertEqual(post['tags'], ['echo', 'ultrasound', 'Русский тег'])
+        legacy = next(p for p in posts if p['slug'] == 'legacy')
+        self.assertEqual(legacy['topics'], ['Cardiology'])
+        self.assertEqual(legacy['tags'], [])
+        blog.build(self.root, self.out)
+        index = (self.out / 'blog/index.html').read_text()
+        page = (self.out / 'blog/one/index.html').read_text()
+        self.assertIn('id="article-tag"', index)
+        self.assertIn('value="Critical care"', index)
+        self.assertIn('value="ultrasound"', index)
+        self.assertIn('/blog/?topic=Critical+care', page)
+        self.assertIn('/blog/?tag=ultrasound', page)
+        self.assertIn('data-tags=', index)
+
+    def test_taxonomy_is_escaped_and_accepts_comma_separated_legacy_input(self):
+        self.write_post(tags='echo, ultrasound, echo', topics=['<script>alert(1)</script>'])
+        post = blog.load_posts(self.root)[0]
+        self.assertEqual(post['tags'], ['echo', 'ultrasound'])
+        rendered = blog.index_page([post])
+        self.assertNotIn('<script>alert', rendered)
+        self.assertIn('&lt;script&gt;', rendered)
+
 
 if __name__ == '__main__':
     unittest.main()
