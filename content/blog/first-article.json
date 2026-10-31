@@ -1,16 +1,11 @@
 {
   "title": "Hemodynamic Effects of Anesthetics, Sedatives, and Analgesics in the CICU: JACC State-of-the-Art Review",
   "slug": "cicu-anesthetics-sedatives-analgesics",
-  "published": false,
+  "published": true,
   "date": "2026-10-31",
   "language": "en",
   "category": "Hemodynamic Effects of Anesthetics, Sedatives, and Analgesics in the CICU",
   "excerpt": "Medications used to provide comfort in the cardiovascular intensive care unit exert complex cardiovascular and respiratory effects, necessitating careful selection based on risk-benefit assessments. Hemodynamic effects include changes in vascular tone which can alter preload and afterload, along with chronotropic and inotropic effects which may cause tachyarrhythmias or bradyarrhythmias, affect contractility and lusitropy, and compromise cardiac output and myocardial oxygen consumption. Drug-induced respiratory depression can also be limiting. This review synthesizes evidence on the cardiovascular and respiratory impact of anesthetics, sedatives, and analgesics and proposes a clinical decision framework tailored to pathophysiology. It is essential to recognize that the selection of drugs based on their properties and the patient’s profile and hemodynamic/respiratory reserve provides only an empiric first step. Given varied physiology and disease heterogeneity and high comorbidity burden of cardiovascular intensive care unit patients, it is paramount to start with individualized conservatively dose-adjusted strategies followed by frequent assessment and tailoring of regimens as appropriate",
-  "body": "<h2>Introduction</h2><p>Start your article here. Use the toolbar for <strong>bold</strong>, <em>italics</em>, lists, pictures and links.</p><h2>A closer look</h2><p>Break your article into short sections. Heading 2 creates an entry in the article’s contents menu.</p><blockquote><p>A short takeaway or important idea can go here.</p></blockquote><h2>Key takeaways</h2><ul><li><p>Add your first takeaway.</p></li><li><p>Add another useful point.</p></li></ul><p></p>",
-  "sections": [
-    {
-      "title": "Watch & learn",
-      "body": "<p>Add a video URL below, or remove this optional section.</p>"
-    }
-  ]
+  "cover": "/media/blog/gradient-heart-monitor-with-iv-drip.png",
+  "body": "<h2>Introduction</h2><p>Start your article here. Use the toolbar for <strong>bold</strong>, <em>italics</em>, lists, pictures and links.</p><h2>A closer look</h2><p>Break your article into short sections. Heading 2 creates an entry in the article’s contents menu.</p><blockquote><p>A short takeaway or important idea can go here.</p></blockquote><h2>Key takeaways</h2><ul><li><p>Add your first takeaway.</p></li><li><p>Add another useful point.</p></li></ul><p></p>"
 }
