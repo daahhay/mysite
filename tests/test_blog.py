@@ -70,7 +70,7 @@ class BlogTests(unittest.TestCase):
             self.assertNotIn(bad, result)
         self.assertIn('<em>title</em>', result)
         self.assertIn('<div class="table-wrap"><table>', result)
-        self.assertEqual(parser.toc, [['section-1', 'Safe title']])
+        self.assertEqual(parser.toc, [['section-1', 'Safe title', 2]])
 
     def test_media_embeds_and_untrusted_provider_fallback(self):
         self.assertIn('youtube-nocookie.com/embed/abcdefghijk', blog.video_block('https://youtu.be/abcdefghijk'))
@@ -116,7 +116,18 @@ class BlogTests(unittest.TestCase):
         self.write_post(body='<h1>Major <em>heading</em></h1><p>Text</p><h2>Smaller heading</h2>')
         post = blog.load_posts(self.root)[0]
         self.assertIn('<h1 id="section-1">Major <em>heading</em></h1>', post['body_html'])
-        self.assertEqual(post['toc'], [['section-1', 'Major heading'], ['section-2', 'Smaller heading']])
+        self.assertEqual(post['toc'], [['section-1', 'Major heading', 1], ['section-2', 'Smaller heading', 2]])
+
+    def test_colored_words_and_three_level_contents(self):
+        self.write_post(body='<h1>First</h1><h2>Second</h2><h3>[color=#357]Third[/color]</h3><p>Before [color=#305E9C]blue &amp; safe[/color] after.</p><span style="color:#abc;background:url(evil)">More</span>')
+        post = blog.load_posts(self.root)[0]
+        page = blog.article_page(post)
+        self.assertEqual([entry[2] for entry in post['toc']], [1, 2, 3])
+        self.assertIn('<li class="toc-level-3"><a href="#section-3">Third</a>', page)
+        self.assertIn('Before <span style="color:#305E9C">blue &amp; safe</span> after.', page)
+        self.assertIn('<span style="color:#abc">More</span>', page)
+        self.assertNotIn('url(evil)', page)
+        self.assertIn('id="palette"', blog.editor_page())
 
     def test_topics_and_tags_round_trip_and_old_articles_still_work(self):
         self.write_post(topics=[' Critical care ', 'cardiology', 'Critical care'], tags=['echo', '#ultrasound', 'ECHO', 'Русский тег'])

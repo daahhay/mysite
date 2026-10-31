@@ -37,7 +37,7 @@ def safe_url(value, media=False):
 
 class ArticleHTML(HTMLParser):
     """Render only a small, safe formatting vocabulary from the visual editor."""
-    allowed = set('p br strong b em i u s del h1 h2 h3 h4 ul ol li blockquote a img hr figure figcaption pre code table thead tbody tr th td sup sub'.split())
+    allowed = set('p br span strong b em i u s del h1 h2 h3 h4 ul ol li blockquote a img hr figure figcaption pre code table thead tbody tr th td sup sub'.split())
     void = {'br', 'img', 'hr'}
     blocked = {'script', 'style', 'iframe', 'object', 'svg', 'math', 'template'}
 
@@ -59,7 +59,13 @@ class ArticleHTML(HTMLParser):
             return
         attrs = dict(attrs)
         rendered = ''
-        if tag == 'a':
+        if tag == 'span':
+            # Only retain an explicit HEX foreground color from rich HTML.
+            for declaration in (attrs.get('style') or '').split(';'):
+                match = re.fullmatch(r'\s*color\s*:\s*(#[0-9a-f]{6}|#[0-9a-f]{3})\s*', declaration, re.I)
+                if match:
+                    rendered = f' style="color:{match[1]}"'
+        elif tag == 'a':
             url = safe_url(attrs.get('href'))
             if url:
                 rendered = f' href="{esc(url)}"'
@@ -68,9 +74,9 @@ class ArticleHTML(HTMLParser):
             if not url:
                 return
             rendered = f' src="{esc(url)}" alt="{esc(attrs.get("alt"))}" loading="lazy" decoding="async"'
-        elif tag in ('h1', 'h2'):
+        elif tag in ('h1', 'h2', 'h3'):
             heading_id = f'section-{len(self.toc) + 1}'
-            self.toc.append([heading_id, ''])
+            self.toc.append([heading_id, '', int(tag[1])])
             self.heading = len(self.toc) - 1
             rendered = f' id="{heading_id}"'
         if tag == 'table':
@@ -96,7 +102,7 @@ class ArticleHTML(HTMLParser):
             self.parts.append(f'</{current}>')
             if current == 'table':
                 self.parts.append('</div>')
-            if current in ('h1', 'h2'):
+            if current in ('h1', 'h2', 'h3'):
                 self.heading = None
             if current == tag:
                 break
@@ -104,7 +110,15 @@ class ArticleHTML(HTMLParser):
     def handle_data(self, data):
         if self.suppressed:
             return
-        self.parts.append(esc(data))
+        # The hosted editor preserves plain-text color runs on subsequent edits.
+        pattern = r'\[color=(#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3})\](.*?)\[/color\]'
+        start = 0
+        for match in re.finditer(pattern, data, re.DOTALL):
+            self.parts.append(esc(data[start:match.start()]))
+            self.parts.append(f'<span style="color:{match[1]}">{esc(match[2])}</span>')
+            start = match.end()
+        self.parts.append(esc(data[start:]))
+        data = re.sub(pattern, lambda match: match[2], data, flags=re.DOTALL)
         self.words.extend(data.split())
         if self.heading is not None:
             self.toc[self.heading][1] += data
@@ -288,10 +302,10 @@ def article_page(post, newer=None, older=None, preview=False):
     cover = ''
     if post.get('cover'):
         cover = f'<figure class="article-cover"><img src="{esc(safe_url(post["cover"], media=True))}" alt="{esc(post.get("cover_alt"))}">' + (f'<figcaption>{esc(post["cover_caption"])}</figcaption>' if post.get('cover_caption') else '') + '</figure>'
-    toc_links = ''.join(f'<li><a href="#{anchor}">{esc(label)}</a></li>' for anchor, label in post['toc'])
+    toc_links = ''.join(f'<li class="toc-level-{level}"><a href="#{anchor}">{esc(label)}</a></li>' for anchor, label, level in post['toc'])
     references = ''
     if post['references']:
-        toc_links += f'<li><a href="#references">{refs_label}</a></li>'
+        toc_links += f'<li class="toc-level-2"><a href="#references">{refs_label}</a></li>'
         references = f'<section class="references" id="references"><h2>{refs_label}</h2><ol>' + ''.join(f'<li><a href="{esc(safe_url(r["url"]))}">{esc(r["title"])}</a></li>' for r in post['references']) + '</ol></section>'
     toc = f'<aside class="article-toc" aria-label="Article contents"><h2>{toc_label}</h2><ol>{toc_links}</ol></aside>' if toc_links else '<div></div>'
     body = f'<div class="reading-layout">{toc}<article class="article-body">{post["body_html"]}{references}</article></div>'
@@ -303,8 +317,28 @@ def article_page(post, newer=None, older=None, preview=False):
     return frame(post['title'], post['excerpt'], post_url(post), banner + title + cover + body + navigation, lang=post['language'], noindex=preview)
 
 
+def palette_panel():
+    colors = [('Graphite', '#363A38'), ('Slate', '#526778'), ('Brown', '#795643'),
+              ('Coral', '#A54436'), ('Amber', '#926214'), ('Olive', '#596D35'),
+              ('Forest', '#286047'), ('Teal', '#236968'), ('Blue', '#305E9C'),
+              ('Indigo', '#554A94'), ('Plum', '#774878'), ('Rose', '#984A69')]
+    swatches = ''.join(f'<button type="button" class="swatch" style="--swatch:{value}" '
+                       f'data-color="{value}" title="{name} ({value})" aria-label="{name} {value}" '
+                       f'aria-pressed="false"></button>' for name, value in colors)
+    return f'''<section class="palette" id="palette" aria-labelledby="palette-heading">
+<h2 id="palette-heading">Text color</h2>
+<p>Enter the words to color, choose a swatch or enter a HEX value, then copy the result into the article’s visual editor. The color appears on the published page.</p>
+<label>Text to color<input id="color-text" type="text" placeholder="A word or phrase"></label>
+<div class="swatches" role="group" aria-label="Text color presets">{swatches}</div>
+<label>Custom HEX<input id="color-hex" value="#286047" maxlength="7" spellcheck="false"></label>
+<div class="color-preview" id="color-preview">Sample text</div>
+<button class="button" type="button" id="color-copy">Copy for article</button>
+<p id="color-status" role="status"></p><textarea id="color-manual" aria-label="Formatted text to copy" readonly hidden></textarea>
+</section><script defer src="/blog/palette.js"></script>'''
+
+
 def editor_page():
-    return frame('Manage your blog', 'Write, illustrate and publish your articles.', '/blog/edit/', '''<section class="editor-intro"><a class="eyebrow" href="/blog/">← BACK TO THE BLOG</a><h1>Your writing desk.</h1><p>Write an article, add pictures and videos, then publish when you’re ready.</p><a class="button" href="https://app.pagescms.org/">Open visual editor <span>↗</span></a><ol class="editor-steps"><li><h2>Connect once</h2><p>Sign in to Pages CMS with GitHub. Install its GitHub app for <strong>daahhay/mysite</strong>, then open that repository and choose <strong>main</strong>. The article editor is already configured.</p></li><li><h2>Write & illustrate</h2><p>Open <strong>Blog articles</strong>, then add an article or edit the draft template. Enter a title, page address and short introduction. Use the formatting toolbar for headings, links and pictures. Add video links or upload short MP4/WebM clips under <strong>Additional sections & videos</strong>. Add sources under <strong>References & useful links</strong>.</p></li><li><h2>Save a draft or publish</h2><p>Keep <strong>Publish on website</strong> off while writing. Turn it on and save when ready. Your article appears at <strong>/blog/your-page-address/</strong> after deployment finishes, usually within a few minutes. Turn it off and save to remove the article from the website.</p></li></ol><div class="editor-note"><strong>Drafts & media</strong><p>Drafts stay off the website, but this GitHub repository is public: draft files and uploaded media can be read there. Use YouTube or Vimeo links for large videos. Article dates are display dates, not a publishing schedule.</p></div><p><a href="https://github.com/daahhay/mysite/actions">Check publishing status ↗</a> · <a href="https://pagescms.org/docs/quick-start/">Editor setup help ↗</a></p></section>''', noindex=True)
+    return frame('Manage your blog', 'Write, illustrate and publish your articles.', '/blog/edit/', '''<section class="editor-intro"><a class="eyebrow" href="/blog/">← BACK TO THE BLOG</a><h1>Your writing desk.</h1><p>Write an article, add pictures and videos, then publish when you’re ready.</p><a class="button" href="https://app.pagescms.org/">Open visual editor <span>↗</span></a>''' + palette_panel() + '''<ol class="editor-steps"><li><h2>Connect once</h2><p>Sign in to Pages CMS with GitHub. Install its GitHub app for <strong>daahhay/mysite</strong>, then open that repository and choose <strong>main</strong>. The article editor is already configured.</p></li><li><h2>Write & illustrate</h2><p>Open <strong>Blog articles</strong>, then add an article or edit the draft template. Enter a title, page address and short introduction. Use the formatting toolbar for headings, links and pictures. Add video links or upload short MP4/WebM clips under <strong>Additional sections & videos</strong>. Add sources under <strong>References & useful links</strong>.</p></li><li><h2>Save a draft or publish</h2><p>Keep <strong>Publish on website</strong> off while writing. Turn it on and save when ready. Your article appears at <strong>/blog/your-page-address/</strong> after deployment finishes, usually within a few minutes. Turn it off and save to remove the article from the website.</p></li></ol><div class="editor-note"><strong>Drafts & media</strong><p>Drafts stay off the website, but this GitHub repository is public: draft files and uploaded media can be read there. Use YouTube or Vimeo links for large videos. Article dates are display dates, not a publishing schedule.</p></div><p><a href="https://github.com/daahhay/mysite/actions">Check publishing status ↗</a> · <a href="https://pagescms.org/docs/quick-start/">Editor setup help ↗</a></p></section>''', noindex=True)
 
 
 def build(root, output, include_drafts=False):

@@ -81,7 +81,7 @@ content:
         type: rich-text
         options:
           format: html
-        description: "Heading 1 is large and centered; Heading 2 is smaller and left-aligned. Both appear in the contents menu. Insert images and links using the toolbar."
+        description: "Heading 1 is large and centered; Heading 2 is smaller and left-aligned. Headings 1–3 appear in the contents menu. For colored words, use the palette at https://tamerlanerdniev.ru/blog/edit/#palette. Insert images and links using the toolbar."
       - name: sections
         label: Additional sections & videos
         type: object
