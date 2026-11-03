@@ -4,7 +4,10 @@
   "published": false,
   "date": "2026-11-03",
   "language": "en",
-  "category": "Notes",
+  "category": "Myocardial Infarction",
+  "topics": [
+    "Acute Coronary Syndrome"
+  ],
   "tags": [
     "OMI/NOMI",
     "Myocardial Infarction"
