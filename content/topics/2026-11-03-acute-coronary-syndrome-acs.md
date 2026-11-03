@@ -1,3 +1,3 @@
 {
-  "title": "Acute Coronary Syndrome (ACS)"
+  "title": "Acute Coronary Syndrome"
 }
