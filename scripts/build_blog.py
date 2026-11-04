@@ -189,7 +189,7 @@ def video_block(url, caption=''):
 def frame(title, description, path, content, lang='en', noindex=False):
     return f'''<!doctype html>
 <html lang="{esc(lang)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{esc(title)} — Tamerlan Erdniev</title><meta name="description" content="{esc(description)}">
+<title>{esc(title)} | Tamerlan Erdniev</title><meta name="description" content="{esc(description)}">
 <link rel="canonical" href="{ORIGIN}{path}"><meta name="robots" content="noindex">
 <meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{ORIGIN}{path}"><meta property="og:type" content="{'article' if path not in ('/blog/', '/blog/edit/') else 'website'}">
 <link rel="shortcut icon" href="/blog/favicon.ico?v=20261104-3"><link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48 96x96" href="/blog/favicon.ico?v=20261104-3"><link rel="icon" type="image/png" sizes="16x16" href="/blog/favicon-16.png?v=20261104-3"><link rel="icon" type="image/png" sizes="32x32" href="/blog/favicon-32.png?v=20261104-3"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest"><meta name="theme-color" content="#f7f6f0"><meta name="apple-mobile-web-app-title" content="Tamerlan"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/blog/blog.css">
