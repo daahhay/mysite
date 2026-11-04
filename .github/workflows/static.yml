@@ -44,6 +44,11 @@ jobs:
           # Publish only generated public pages and assets; never article drafts
           path: '_site'
           name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Clear timed-out Pages deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api --method POST repos/daahhay/mysite/pages/deployments/a744235e4a0c92c7fff6cad0235efc9c24c32512/cancel
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
