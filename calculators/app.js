@@ -57,6 +57,13 @@ if (form) {
     add(result,'span', answer.incomplete ? 'DOCUMENTED RESULT' : 'RESULT','eyebrow');
     add(result,'div',answer.probability ? answer.score.toFixed(1)+'%' : String(answer.score),'score');
     if (answer.maximum) add(result,'p','of '+answer.maximum+' points','score-unit');
+    if (answer.estimatedProbability) {
+      add(result,'div',answer.estimatedProbability,'probability-estimate');
+      add(result,'p','Estimated HFpEF probability','probability-label');
+      const note = add(result,'p','Approximate reading from the original study’s probability chart. ','field-help');
+      const source = add(note,'a','View source');
+      source.href = 'https://pmc.ncbi.nlm.nih.gov/articles/PMC6202181/#F1';
+    }
     add(result,'h2',answer.category);
     add(result,'p',answer.detail);
     const details = add(result,'details','');

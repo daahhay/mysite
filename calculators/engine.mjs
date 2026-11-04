@@ -34,8 +34,11 @@ export function calculate(slug, v) {
       rows = [row('BMI >30', v.bmi > 30 ? 2 : 0), row('AF history', 3 * v.af), row('Age >60', +(v.age > 60)),
         row('At least two antihypertensives', v.htn2), row('PASP >35', +(v.pasp > 35)), row('E/e′ >9', +(v.ee > 9))];
       score = rows.reduce((sum, r) => sum + r.points, 0);
-      return total(rows, score <= 1 ? 'Low HFpEF likelihood' : score <= 5 ? 'Intermediate HFpEF likelihood' : 'High HFpEF likelihood',
-        score >= 2 && score <= 5 ? 'Additional diagnostic testing is needed.' : 'Interpret in adults with unexplained dyspnea and preserved EF.', 9);
+      return {...total(rows, score <= 1 ? 'Low HFpEF likelihood' : score <= 5 ? 'Intermediate HFpEF likelihood' : 'High HFpEF likelihood',
+        score >= 2 && score <= 5 ? 'Additional diagnostic testing is needed.' : 'Interpret in adults with unexplained dyspnea and preserved EF.', 9),
+        // Approximate readings from Reddy et al., Circulation 2018, Figure 1.
+        // The nomogram ends at 20% and 95%; do not extrapolate beyond it.
+        estimatedProbability: ['<20%', '≈23%', '≈39%', '≈56%', '≈72%', '≈83%', '≈91%', '≈95%', '>95%', '>95%'][score]};
     case 'hfpef-aba': {
       const logOdds = -7.788751 + 0.062564 * v.age + 0.135149 * v.bmi + 2.040806 * v.af;
       return {score: 100 / (1 + Math.exp(-logOdds)), probability: true, category: 'Estimated HFpEF probability',

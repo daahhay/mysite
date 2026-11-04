@@ -61,3 +61,16 @@ for(const definition of definitions) {
 }
 assert.notEqual(validate(definitions.find(d=>d.slug==='hfpef-aba'),{age:70,bmi:30,af:null}),'');
 console.log('Passed calculator threshold, domain, probability and validation checks.');
+
+// Exercise every achievable H2FPEF total and its nomogram estimate.
+const estimates=['<20%','≈23%','≈39%','≈56%','≈72%','≈83%','≈91%','≈95%','>95%','>95%'];
+const seen=new Set();
+for(let mask=0;mask<64;mask++){
+ const result=calculate('h2fpef',{bmi:mask&1?31:30,af:mask&2?1:0,age:mask&4?61:60,htn2:mask&8?1:0,pasp:mask&16?36:35,ee:mask&32?10:9});
+ assert.equal(result.estimatedProbability,estimates[result.score]);
+ assert.equal(result.maximum,9);
+ assert.equal(result.probability,undefined);
+ seen.add(result.score);
+}
+assert.equal(seen.size,10);
+console.log('Passed all H2FPEF probability conversions.');
