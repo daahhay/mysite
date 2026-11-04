@@ -192,7 +192,7 @@ def frame(title, description, path, content, lang='en', noindex=False):
 <title>{esc(title)} — Tamerlan Erdniev</title><meta name="description" content="{esc(description)}">
 <link rel="canonical" href="{ORIGIN}{path}"><meta name="robots" content="noindex">
 <meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{ORIGIN}{path}"><meta property="og:type" content="{'article' if path not in ('/blog/', '/blog/edit/') else 'website'}">
-<link rel="icon" type="image/svg+xml" href="/blog/favicon.svg"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/blog/blog.css">
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon.png"><link rel="icon" href="/favicon.ico" sizes="any"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest"><meta name="theme-color" content="#f7f6f0"><meta name="apple-mobile-web-app-title" content="Tamerlan"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/blog/blog.css">
 </head><body><a class="skip" href="#main">Skip to content</a>
 <header class="blog-header"><div class="wordmark" aria-label="Tamerlan Erdniev"><span class="brand">te<span>.</span></span><span class="owner-name">Tamerlan Erdniev</span></div></header>
 <main class="blog-main" id="main">{content}</main>
@@ -444,7 +444,7 @@ def build(root, output, include_drafts=False):
         shutil.rmtree(output)
     output.mkdir(parents=True)
     (output / '.blog-generated').touch()
-    for pattern in ('*.html', '*.css', '*.js', '*.svg', '*.ico', 'CNAME', 'robots.txt'):
+    for pattern in ('*.html', '*.css', '*.js', '*.svg', '*.ico', '*.png', '*.webmanifest', 'CNAME', 'robots.txt'):
         for source in root.glob(pattern):
             if source.is_file():
                 shutil.copy2(source, output / source.name)
