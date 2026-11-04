@@ -254,7 +254,9 @@ def load_posts(root, include_drafts=False):
             post['language'] = post.get('language') or 'en'
             if post['language'] not in ('en', 'ru'):
                 raise ValueError('Language must be en or ru')
-            post['topics'] = labels([str(post.get('category') or 'Notes')] + labels(post.get('topics')))
+            new_topics = labels(post.get('new_topics'))
+            post['category'] = post.get('category') or next(iter(new_topics or labels(post.get('topics'))), 'Notes')
+            post['topics'] = labels([str(post['category'])] + labels(post.get('topics')) + new_topics)
             post['tags'] = labels(post.get('tags'))
             for field in ('sections', 'references', 'attachments'):
                 post[field] = post.get(field) or []

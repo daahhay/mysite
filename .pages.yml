@@ -50,15 +50,14 @@ content:
       - name: category
         label: Primary topic
         type: reference
-        default: Notes
-        description: Choose a saved topic. To add a new one, save it in Topics first.
+        description: Choose an existing topic, or leave blank to use the first New topic below.
         options:
           collection: topic_library
           search: fields.title
           value: "{primary}"
           label: "{primary}"
       - name: topics
-        label: Additional topics
+        label: Existing topics
         type: reference
         options:
           collection: topic_library
@@ -66,6 +65,11 @@ content:
           search: fields.title
           value: "{primary}"
           label: "{primary}"
+      - name: new_topics
+        label: New topics
+        type: string
+        list: true
+        description: "Type new topics here, one per item. Save the article (drafts work too) and they will become suggestions for future articles after a short delay. Refresh the editor after saving to see the updated suggestions."
       - name: tags
         label: Tags
         type: string

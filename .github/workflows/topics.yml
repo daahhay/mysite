@@ -1,0 +1,46 @@
+name: Update topic suggestions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'content/blog/**'
+      - 'scripts/sync_topics.py'
+      - '.github/workflows/topics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: topic-suggestions
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Collect saved topics
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git checkout -B topic-sync origin/main
+            python3 scripts/sync_topics.py
+            git add content/topics
+            if git diff --cached --quiet; then
+              exit 0
+            fi
+            git commit -m "Update topic suggestions from saved articles"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Topic suggestions could not be saved after concurrent updates."
+          exit 1
