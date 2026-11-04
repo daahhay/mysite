@@ -192,7 +192,7 @@ def frame(title, description, path, content, lang='en', noindex=False):
 <title>{esc(title)} — Tamerlan Erdniev</title><meta name="description" content="{esc(description)}">
 <link rel="canonical" href="{ORIGIN}{path}"><meta name="robots" content="noindex">
 <meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{ORIGIN}{path}"><meta property="og:type" content="{'article' if path not in ('/blog/', '/blog/edit/') else 'website'}">
-<link rel="icon" type="image/png" sizes="96x96" href="/favicon.png"><link rel="icon" href="/favicon.ico" sizes="any"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest"><meta name="theme-color" content="#f7f6f0"><meta name="apple-mobile-web-app-title" content="Tamerlan"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/blog/blog.css">
+<link rel="icon" type="image/x-icon" href="/favicon.ico"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest"><meta name="theme-color" content="#f7f6f0"><meta name="apple-mobile-web-app-title" content="Tamerlan"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/blog/blog.css">
 </head><body><a class="skip" href="#main">Skip to content</a>
 <header class="blog-header"><div class="wordmark" aria-label="Tamerlan Erdniev"><span class="brand">te<span>.</span></span><span class="owner-name">Tamerlan Erdniev</span></div></header>
 <main class="blog-main" id="main">{content}</main>
@@ -467,8 +467,11 @@ def build(root, output, include_drafts=False):
         (target / 'index.html').write_text(article_page(post, newer, older, include_drafts), encoding='utf-8')
     for page in output.rglob('*.html'):
         html = page.read_text(encoding='utf-8')
+        if '</head>' in html and 'href="/favicon.ico"' not in html:
+            html = html.replace('</head>', '<link rel="icon" type="image/x-icon" href="/favicon.ico"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico"></head>', 1)
         if '<body>' in html and 'http-equiv="refresh"' not in html.lower():
-            page.write_text(html.replace('<body>', '<body>' + IMAGE_LOADER, 1), encoding='utf-8')
+            html = html.replace('<body>', '<body>' + IMAGE_LOADER, 1)
+        page.write_text(html, encoding='utf-8')
     urls = ['/', '/main_ru.html']
     sitemap = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join(f'<url><loc>{ORIGIN}{u}</loc></url>' for u in urls) + '</urlset>'
     (output / 'sitemap.xml').write_text(sitemap, encoding='utf-8')
