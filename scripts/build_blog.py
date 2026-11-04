@@ -468,6 +468,10 @@ def build(root, output, include_drafts=False):
         newer = posts[index - 1] if index else None
         older = posts[index + 1] if index + 1 < len(posts) else None
         (target / 'index.html').write_text(article_page(post, newer, older, include_drafts), encoding='utf-8')
+    if (root / 'calculators/data.json').exists():
+        import runpy
+        calculator_builder = runpy.run_path(str(root / 'scripts/build_calculators.py'))
+        calculator_builder['build_calculators'](root, output, frame)
     for page in output.rglob('*.html'):
         html = page.read_text(encoding='utf-8')
         if '</head>' in html and 'rel="icon"' not in html:

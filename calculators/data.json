@@ -1,0 +1,920 @@
+[
+  {
+    "slug": "cha2ds2-vasc",
+    "title": "CHA₂DS₂-VASc",
+    "category": "Atrial fibrillation",
+    "summary": "Stroke risk factors in adults with atrial fibrillation.",
+    "fields": [
+      {
+        "id": "age",
+        "label": "Age",
+        "type": "number",
+        "min": 18,
+        "max": 120,
+        "unit": "years",
+        "step": 1,
+        "optional": false
+      },
+      {
+        "id": "female",
+        "label": "Sex",
+        "options": [
+          {
+            "value": 0,
+            "label": "Male"
+          },
+          {
+            "value": 1,
+            "label": "Female"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "hf",
+        "label": "Heart failure or left ventricular dysfunction",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "htn",
+        "label": "History of hypertension",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "diabetes",
+        "label": "Diabetes mellitus",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "stroke",
+        "label": "Previous stroke, TIA or systemic embolism",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "vascular",
+        "label": "Vascular disease",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": "Previous myocardial infarction, peripheral arterial disease or aortic plaque."
+      }
+    ],
+    "references": [
+      {
+        "label": "2023 ACC/AHA/ACCP/HRS atrial fibrillation guideline",
+        "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001193"
+      }
+    ],
+    "note": "For adults with AF. Interpret alongside current guidelines, bleeding risk and clinical context. Female sex alone does not establish an indication for anticoagulation.",
+    "method": "Age 65–74 contributes 1 point, age ≥75 contributes 2. Previous stroke/TIA/systemic embolism contributes 2. Each other listed factor contributes 1. Maximum 9. Annual stroke rates vary across cohorts, so no fixed percentage is assigned here."
+  },
+  {
+    "slug": "h2fpef",
+    "title": "H₂FPEF",
+    "category": "Heart failure",
+    "summary": "HFpEF likelihood in adults with unexplained exertional dyspnea.",
+    "fields": [
+      {
+        "id": "age",
+        "label": "Age",
+        "type": "number",
+        "min": 18,
+        "max": 120,
+        "unit": "years",
+        "step": 1,
+        "optional": false
+      },
+      {
+        "id": "bmi",
+        "label": "Body mass index",
+        "type": "number",
+        "min": 10,
+        "max": 100,
+        "unit": "kg/m²",
+        "step": "any",
+        "optional": false
+      },
+      {
+        "id": "af",
+        "label": "History of atrial fibrillation",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": "Paroxysmal, persistent or permanent AF."
+      },
+      {
+        "id": "htn2",
+        "label": "Taking at least two antihypertensive medicines",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "pasp",
+        "label": "Pulmonary artery systolic pressure",
+        "type": "number",
+        "min": 5,
+        "max": 200,
+        "unit": "mmHg",
+        "step": "any",
+        "optional": false
+      },
+      {
+        "id": "ee",
+        "label": "Average E/e′ ratio",
+        "type": "number",
+        "min": 1,
+        "max": 60,
+        "unit": "",
+        "step": "any",
+        "optional": false
+      }
+    ],
+    "references": [
+      {
+        "label": "Reddy et al., Circulation (2018)",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6202181/"
+      }
+    ],
+    "note": "Use in the evaluation of unexplained dyspnea with preserved ejection fraction. Intermediate scores require further evaluation.",
+    "method": "BMI >30 adds 2 points, AF adds 3. Age >60, ≥2 antihypertensive medicines, PASP >35 and E/e′ >9 each add 1. Scores 0–1 indicate low, 2–5 intermediate and 6–9 high likelihood."
+  },
+  {
+    "slug": "hfa-peff",
+    "title": "HFA-PEFF",
+    "category": "Heart failure",
+    "summary": "Resting echocardiographic and biomarker score for suspected HFpEF.",
+    "fields": [
+      {
+        "id": "age",
+        "label": "Age",
+        "type": "number",
+        "min": 18,
+        "max": 120,
+        "unit": "years",
+        "step": 1,
+        "optional": false
+      },
+      {
+        "id": "female",
+        "label": "Sex",
+        "options": [
+          {
+            "value": 0,
+            "label": "Male"
+          },
+          {
+            "value": 1,
+            "label": "Female"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "af",
+        "label": "Rhythm at assessment",
+        "options": [
+          {
+            "value": 0,
+            "label": "Sinus rhythm"
+          },
+          {
+            "value": 1,
+            "label": "Atrial fibrillation"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "septal",
+        "label": "Septal e′",
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "unit": "cm/s",
+        "step": "any",
+        "optional": true
+      },
+      {
+        "id": "lateral",
+        "label": "Lateral e′",
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "unit": "cm/s",
+        "step": "any",
+        "optional": true
+      },
+      {
+        "id": "ee",
+        "label": "Average E/e′",
+        "type": "number",
+        "min": 1,
+        "max": 60,
+        "unit": "",
+        "step": "any",
+        "optional": true
+      },
+      {
+        "id": "tr",
+        "label": "Peak tricuspid regurgitation velocity",
+        "type": "number",
+        "min": 0,
+        "max": 7,
+        "unit": "m/s",
+        "step": "any",
+        "optional": true
+      },
+      {
+        "id": "pasp",
+        "label": "Pulmonary artery systolic pressure",
+        "type": "number",
+        "min": 5,
+        "max": 200,
+        "unit": "mmHg",
+        "step": "any",
+        "optional": true
+      },
+      {
+        "id": "gls",
+        "label": "Global longitudinal strain, absolute magnitude",
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "unit": "%",
+        "step": "any",
+        "optional": true
+      },
+      {
+        "id": "lavi",
+        "label": "Left atrial volume index",
+        "type": "number",
+        "min": 5,
+        "max": 200,
+        "unit": "mL/m²",
+        "step": "any",
+        "optional": true
+      },
+      {
+        "id": "lvmi",
+        "label": "LV mass index",
+        "type": "number",
+        "min": 20,
+        "max": 400,
+        "unit": "g/m²",
+        "step": "any",
+        "optional": true
+      },
+      {
+        "id": "rwt",
+        "label": "Relative wall thickness",
+        "type": "number",
+        "min": 0.1,
+        "max": 1.5,
+        "unit": "",
+        "step": "any",
+        "optional": true
+      },
+      {
+        "id": "wall",
+        "label": "LV wall thickness",
+        "type": "number",
+        "min": 3,
+        "max": 40,
+        "unit": "mm",
+        "step": "any",
+        "optional": true
+      },
+      {
+        "id": "nt",
+        "label": "NT-proBNP",
+        "type": "number",
+        "min": 0,
+        "max": 200000,
+        "unit": "pg/mL",
+        "step": "any",
+        "optional": true
+      },
+      {
+        "id": "bnp",
+        "label": "BNP",
+        "type": "number",
+        "min": 0,
+        "max": 100000,
+        "unit": "pg/mL",
+        "step": "any",
+        "optional": true
+      }
+    ],
+    "references": [
+      {
+        "label": "Pieske et al., HFA–PEFF consensus (2019)",
+        "url": "https://doi.org/10.1093/eurheartj/ehz641"
+      }
+    ],
+    "note": "Step 2 (resting score). Enter available measurements and leave unmeasured values blank. Missing data can underestimate the score. This calculator does not add exercise-testing points.",
+    "method": "Each domain contributes at most 2 points. Functional major criteria include age-adjusted low e′, E/e′ ≥15 or TR velocity >2.8. Morphology uses LAVI, LV mass and wall geometry. Biomarker thresholds depend on rhythm. The domain breakdown lists the criteria met. A score ≥5 supports HFpEF in the appropriate clinical setting; 2–4 prompts functional testing; 0–1 makes HFpEF unlikely only with adequate assessment."
+  },
+  {
+    "slug": "hfpef-aba",
+    "title": "HFpEF-ABA",
+    "category": "Heart failure",
+    "summary": "HFpEF probability from age, body mass index and AF history.",
+    "fields": [
+      {
+        "id": "age",
+        "label": "Age",
+        "type": "number",
+        "min": 18,
+        "max": 120,
+        "unit": "years",
+        "step": 1,
+        "optional": false
+      },
+      {
+        "id": "bmi",
+        "label": "Body mass index",
+        "type": "number",
+        "min": 10,
+        "max": 100,
+        "unit": "kg/m²",
+        "step": "any",
+        "optional": false
+      },
+      {
+        "id": "af",
+        "label": "History of atrial fibrillation",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": "Paroxysmal, persistent or permanent AF."
+      }
+    ],
+    "references": [
+      {
+        "label": "Reddy et al., Nature Medicine (2024), Extended Data Table 4",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11570987/"
+      }
+    ],
+    "note": "Screening model for ambulatory adults with dyspnea. Echocardiography and evaluation for alternative causes remain necessary. The percentage is a model estimate, not a confirmed diagnosis.",
+    "method": "Log odds = −7.788751 + 0.062564 × age + 0.135149 × BMI + 2.040806 × AF (1 if present, otherwise 0). Probability = 100 / (1 + exp(−log odds))."
+  },
+  {
+    "slug": "revised-geneva",
+    "title": "Revised Geneva",
+    "category": "Pulmonary embolism",
+    "summary": "Weighted pretest probability score for suspected pulmonary embolism.",
+    "fields": [
+      {
+        "id": "age",
+        "label": "Age",
+        "type": "number",
+        "min": 18,
+        "max": 120,
+        "unit": "years",
+        "step": 1,
+        "optional": false
+      },
+      {
+        "id": "hr",
+        "label": "Heart rate",
+        "type": "number",
+        "min": 20,
+        "max": 300,
+        "unit": "beats/min",
+        "step": 1,
+        "optional": false
+      },
+      {
+        "id": "vte",
+        "label": "Previous DVT or pulmonary embolism",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "surgery",
+        "label": "Surgery or lower-limb fracture in the past month",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": "Surgery under general anesthesia."
+      },
+      {
+        "id": "cancer",
+        "label": "Active malignancy",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": "Active solid or hematologic cancer, or considered cured within the past year."
+      },
+      {
+        "id": "pain",
+        "label": "Unilateral lower-limb pain",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "hemoptysis",
+        "label": "Hemoptysis",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "signs",
+        "label": "Deep venous tenderness AND unilateral leg edema",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": "Both findings must be present."
+      }
+    ],
+    "references": [
+      {
+        "label": "2019 ESC/ERS pulmonary embolism guideline, Table 5",
+        "url": "https://academic.oup.com/eurheartj/article/41/4/543/5556136"
+      }
+    ],
+    "note": "For adults with suspected PE. This estimates pretest probability and must be used within a diagnostic pathway.",
+    "method": "Age >65 = 1; prior VTE = 3; recent surgery/fracture = 2; cancer = 2; unilateral pain = 3; hemoptysis = 2; deep venous tenderness with unilateral edema = 4. Heart rate 75–94 = 3, ≥95 = 5. Low 0–3, intermediate 4–10, high ≥11. PE unlikely 0–5, likely ≥6."
+  },
+  {
+    "slug": "simplified-geneva",
+    "title": "Simplified revised Geneva",
+    "category": "Pulmonary embolism",
+    "summary": "Simplified pretest probability score for suspected pulmonary embolism.",
+    "fields": [
+      {
+        "id": "age",
+        "label": "Age",
+        "type": "number",
+        "min": 18,
+        "max": 120,
+        "unit": "years",
+        "step": 1,
+        "optional": false
+      },
+      {
+        "id": "hr",
+        "label": "Heart rate",
+        "type": "number",
+        "min": 20,
+        "max": 300,
+        "unit": "beats/min",
+        "step": 1,
+        "optional": false
+      },
+      {
+        "id": "vte",
+        "label": "Previous DVT or pulmonary embolism",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "surgery",
+        "label": "Surgery or lower-limb fracture in the past month",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": "Surgery under general anesthesia."
+      },
+      {
+        "id": "cancer",
+        "label": "Active malignancy",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": "Active solid or hematologic cancer, or considered cured within the past year."
+      },
+      {
+        "id": "pain",
+        "label": "Unilateral lower-limb pain",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "hemoptysis",
+        "label": "Hemoptysis",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "signs",
+        "label": "Deep venous tenderness AND unilateral leg edema",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": "Both findings must be present."
+      }
+    ],
+    "references": [
+      {
+        "label": "2019 ESC/ERS pulmonary embolism guideline, Table 5",
+        "url": "https://academic.oup.com/eurheartj/article/41/4/543/5556136"
+      }
+    ],
+    "note": "For adults with suspected PE. This is the simplified revised Geneva version, with a maximum of 9 points.",
+    "method": "Each risk factor contributes 1 point. Heart rate 75–94 contributes 1, ≥95 contributes 2. Age threshold is >65. Low 0–1, intermediate 2–4, high ≥5. PE unlikely 0–2, likely ≥3."
+  },
+  {
+    "slug": "pesi",
+    "title": "PESI",
+    "category": "Pulmonary embolism",
+    "summary": "Thirty-day mortality risk class in adults with confirmed pulmonary embolism.",
+    "fields": [
+      {
+        "id": "age",
+        "label": "Age",
+        "type": "number",
+        "min": 18,
+        "max": 120,
+        "unit": "years",
+        "step": 1,
+        "optional": false
+      },
+      {
+        "id": "female",
+        "label": "Sex",
+        "options": [
+          {
+            "value": 0,
+            "label": "Male"
+          },
+          {
+            "value": 1,
+            "label": "Female"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "cancer",
+        "label": "History of cancer",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "hf",
+        "label": "History of heart failure",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "lung",
+        "label": "Chronic lung disease",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "hr",
+        "label": "Heart rate",
+        "type": "number",
+        "min": 20,
+        "max": 300,
+        "unit": "beats/min",
+        "step": 1,
+        "optional": false
+      },
+      {
+        "id": "sbp",
+        "label": "Systolic blood pressure",
+        "type": "number",
+        "min": 30,
+        "max": 300,
+        "unit": "mmHg",
+        "step": "any",
+        "optional": false
+      },
+      {
+        "id": "rr",
+        "label": "Respiratory rate",
+        "type": "number",
+        "min": 1,
+        "max": 100,
+        "unit": "breaths/min",
+        "step": 1,
+        "optional": false
+      },
+      {
+        "id": "temp",
+        "label": "Temperature",
+        "type": "number",
+        "min": 25,
+        "max": 45,
+        "unit": "°C",
+        "step": "any",
+        "optional": false
+      },
+      {
+        "id": "mental",
+        "label": "Altered mental status",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": "Disorientation, lethargy, stupor or coma."
+      },
+      {
+        "id": "sat",
+        "label": "Oxygen saturation",
+        "type": "number",
+        "min": 30,
+        "max": 100,
+        "unit": "%",
+        "step": "any",
+        "optional": false
+      }
+    ],
+    "references": [
+      {
+        "label": "Aujesky et al., original PESI study (2005)",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2718410/"
+      }
+    ],
+    "note": "For confirmed acute PE. Use hemodynamic status and the full clinical assessment when deciding disposition.",
+    "method": "Start with age in years. Add male sex 10, cancer 30, heart failure 10, lung disease 10, pulse ≥110 20, systolic BP <100 30, respiratory rate ≥30 20, temperature <36°C 20, altered mental status 60, oxygen saturation <90% 20. Classes I ≤65, II 66–85, III 86–105, IV 106–125, V ≥126."
+  },
+  {
+    "slug": "spesi",
+    "title": "sPESI",
+    "category": "Pulmonary embolism",
+    "summary": "Simplified thirty-day mortality risk assessment in confirmed pulmonary embolism.",
+    "fields": [
+      {
+        "id": "age",
+        "label": "Age",
+        "type": "number",
+        "min": 18,
+        "max": 120,
+        "unit": "years",
+        "step": 1,
+        "optional": false
+      },
+      {
+        "id": "cancer",
+        "label": "History of cancer",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "cardiopulmonary",
+        "label": "Chronic heart failure or chronic lung disease",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": "One combined criterion, even if both are present."
+      },
+      {
+        "id": "hr",
+        "label": "Heart rate",
+        "type": "number",
+        "min": 20,
+        "max": 300,
+        "unit": "beats/min",
+        "step": 1,
+        "optional": false
+      },
+      {
+        "id": "sbp",
+        "label": "Systolic blood pressure",
+        "type": "number",
+        "min": 30,
+        "max": 300,
+        "unit": "mmHg",
+        "step": "any",
+        "optional": false
+      },
+      {
+        "id": "sat",
+        "label": "Oxygen saturation",
+        "type": "number",
+        "min": 30,
+        "max": 100,
+        "unit": "%",
+        "step": "any",
+        "optional": false
+      }
+    ],
+    "references": [
+      {
+        "label": "2026 AHA/ACC acute pulmonary embolism guideline",
+        "url": "https://doi.org/10.1016/j.jacc.2025.11.005"
+      }
+    ],
+    "note": "For confirmed acute PE. A low score alone is insufficient to establish suitability for outpatient treatment.",
+    "method": "One point each for age >80, cancer, chronic cardiopulmonary disease, heart rate ≥110, systolic BP <100 and oxygen saturation <90%. Zero points indicates lower risk; ≥1 indicates elevated risk."
+  }
+]

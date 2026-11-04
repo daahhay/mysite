@@ -1,0 +1,63 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {calculate, validate} from '../calculators/engine.mjs';
+const definitions=JSON.parse(readFileSync(new URL('../calculators/data.json',import.meta.url)));
+const zero=slug=>Object.fromEntries(definitions.find(d=>d.slug===slug).fields.map(f=>[f.id,f.optional?null:f.options?0:f.min]));
+const score=(slug,v)=>calculate(slug,v).score;
+let v={...zero('cha2ds2-vasc'),age:64};
+assert.equal(score('cha2ds2-vasc',v),0);
+assert.equal(score('cha2ds2-vasc',{...v,age:65}),1);
+assert.equal(score('cha2ds2-vasc',{...v,age:74}),1);
+assert.equal(score('cha2ds2-vasc',{...v,age:75,female:1,hf:1,htn:1,diabetes:1,stroke:1,vascular:1}),9);
+v={age:60,bmi:30,af:0,htn2:0,pasp:35,ee:9};
+assert.equal(score('h2fpef',v),0);
+assert.equal(score('h2fpef',{age:61,bmi:30.1,af:1,htn2:1,pasp:35.1,ee:9.1}),9);
+assert.match(calculate('h2fpef',{...v,bmi:31}).category,/Intermediate/);
+assert.match(calculate('h2fpef',{...v,bmi:31,af:1,age:61}).category,/High/);
+v={age:65,hr:74,vte:0,surgery:0,cancer:0,pain:0,hemoptysis:0,signs:0};
+for(const slug of ['revised-geneva','simplified-geneva']) {
+ const simple=slug==='simplified-geneva';
+ assert.equal(score(slug,v),0);
+ assert.equal(score(slug,{...v,hr:75}),simple?1:3);
+ assert.equal(score(slug,{...v,hr:94}),simple?1:3);
+ assert.equal(score(slug,{...v,hr:95}),simple?2:5);
+ assert.equal(score(slug,{age:66,hr:95,vte:1,surgery:1,cancer:1,pain:1,hemoptysis:1,signs:1}),simple?9:22);
+}
+v={age:65,female:1,cancer:0,hf:0,lung:0,hr:109,sbp:100,rr:29,temp:36,mental:0,sat:90};
+for(const [age,category] of [[65,'I'],[66,'II'],[85,'II'],[86,'III'],[105,'III'],[106,'IV'],[125,'IV'],[126,'V']]) {
+ assert.equal(calculate('pesi',{...v,age}).category.split(' · ')[0],'Class '+category);
+}
+assert.equal(score('pesi',{...v,age:80,female:0,cancer:1,hf:1,lung:1,hr:110,sbp:99,rr:30,temp:35.9,mental:1,sat:89}),310);
+v={age:80,cancer:0,cardiopulmonary:0,hr:109,sbp:100,sat:90};
+assert.equal(score('spesi',v),0);
+assert.equal(score('spesi',{age:81,cancer:1,cardiopulmonary:1,hr:110,sbp:99,sat:89}),6);
+const aba=calculate('hfpef-aba',{age:70,bmi:30,af:0});
+assert.ok(Math.abs(aba.logOdds-0.645199)<1e-9);
+assert.ok(Math.abs(aba.score-65.592775658)<0.00001);
+v={age:74,female:0,af:0,septal:7,lateral:10,ee:8,tr:2.8,gls:16,lavi:28,lvmi:115,rwt:.42,wall:11,nt:124,bnp:null};
+assert.equal(score('hfa-peff',v),0);
+assert.equal(calculate('hfa-peff',v).incomplete,false);
+assert.equal(score('hfa-peff',{...v,septal:6.9}),2);
+assert.equal(score('hfa-peff',{...v,age:75,septal:6.9}),0);
+assert.equal(score('hfa-peff',{...v,ee:14.9}),1);
+assert.equal(score('hfa-peff',{...v,ee:15}),2);
+assert.equal(score('hfa-peff',{...v,lavi:34}),1);
+assert.equal(score('hfa-peff',{...v,lavi:34.1}),2);
+assert.equal(score('hfa-peff',{...v,af:1,lavi:40,nt:660}),2);
+assert.equal(score('hfa-peff',{...v,af:1,lavi:40.1,nt:660.1}),4);
+assert.equal(score('hfa-peff',{...v,lvmi:149,rwt:.43}),2);
+assert.equal(score('hfa-peff',{...v,female:1,lvmi:122,rwt:.43}),2);
+assert.equal(score('hfa-peff',{...v,ee:15,septal:4,tr:3,lavi:50,lvmi:160,rwt:.5,nt:1000,bnp:500}),6);
+assert.equal(calculate('hfa-peff',{...v,septal:null}).incomplete,true);
+assert.equal(score('hfa-peff',{...zero('hfa-peff'),ee:15}),2);
+for(const definition of definitions) {
+ assert.notEqual(validate(definition,{}),'');
+ const values=zero(definition.slug);
+ if(definition.slug==='hfa-peff') values.ee=8;
+ assert.equal(validate(definition,values),'');
+ assert.notEqual(validate(definition,{...values,age:-1}),'');
+ assert.notEqual(validate(definition,{...values,age:NaN}),'');
+ assert.notEqual(validate(definition,{...values,age:60.5}),'');
+}
+assert.notEqual(validate(definitions.find(d=>d.slug==='hfpef-aba'),{age:70,bmi:30,af:null}),'');
+console.log('Passed calculator threshold, domain, probability and validation checks.');

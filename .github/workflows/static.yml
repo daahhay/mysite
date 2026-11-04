@@ -34,6 +34,7 @@ jobs:
       - name: Build website and blog
         run: |
           python3 -m unittest discover -s tests
+          node tests/calculators.test.mjs
           python3 scripts/build_blog.py
       - name: Setup Pages
         uses: actions/configure-pages@v5
