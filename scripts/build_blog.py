@@ -192,7 +192,7 @@ def frame(title, description, path, content, lang='en', noindex=False):
 <title>{esc(title)} — Tamerlan Erdniev</title><meta name="description" content="{esc(description)}">
 <link rel="canonical" href="{ORIGIN}{path}"><meta name="robots" content="noindex">
 <meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{ORIGIN}{path}"><meta property="og:type" content="{'article' if path not in ('/blog/', '/blog/edit/') else 'website'}">
-<link rel="shortcut icon" href="/favicon.ico?v=20261104-2"><link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48 96x96" href="/favicon.ico?v=20261104-2"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png?v=20261104-2"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=20261104-2"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest"><meta name="theme-color" content="#f7f6f0"><meta name="apple-mobile-web-app-title" content="Tamerlan"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/blog/blog.css">
+<link rel="shortcut icon" href="/blog/favicon.ico?v=20261104-3"><link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48 96x96" href="/blog/favicon.ico?v=20261104-3"><link rel="icon" type="image/png" sizes="16x16" href="/blog/favicon-16.png?v=20261104-3"><link rel="icon" type="image/png" sizes="32x32" href="/blog/favicon-32.png?v=20261104-3"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest"><meta name="theme-color" content="#f7f6f0"><meta name="apple-mobile-web-app-title" content="Tamerlan"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/blog/blog.css">
 </head><body><a class="skip" href="#main">Skip to content</a>
 <header class="blog-header"><div class="wordmark" aria-label="Tamerlan Erdniev"><span class="brand">te<span>.</span></span><span class="owner-name">Tamerlan Erdniev</span></div></header>
 <main class="blog-main" id="main">{content}</main>
@@ -456,6 +456,9 @@ def build(root, output, include_drafts=False):
     for source in (root / 'blog').glob('*'):
         if source.is_file():
             shutil.copy2(source, blog / source.name)
+    for name in ('favicon.ico', 'favicon-16.png', 'favicon-32.png'):
+        if (root / name).exists():
+            shutil.copy2(root / name, blog / name)
     (blog / 'index.html').write_text(index_page(posts), encoding='utf-8')
     (blog / 'edit').mkdir()
     (blog / 'edit/index.html').write_text(editor_page(), encoding='utf-8')
@@ -467,7 +470,7 @@ def build(root, output, include_drafts=False):
         (target / 'index.html').write_text(article_page(post, newer, older, include_drafts), encoding='utf-8')
     for page in output.rglob('*.html'):
         html = page.read_text(encoding='utf-8')
-        if '</head>' in html and 'href="/favicon.ico' not in html:
+        if '</head>' in html and 'rel="icon"' not in html:
             html = html.replace('</head>', '<link rel="shortcut icon" href="/favicon.ico?v=20261104-2"><link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48 96x96" href="/favicon.ico?v=20261104-2"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png?v=20261104-2"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=20261104-2"></head>', 1)
         if '<body>' in html and 'http-equiv="refresh"' not in html.lower():
             html = html.replace('<body>', '<body>' + IMAGE_LOADER, 1)
