@@ -9,3 +9,5 @@
 @media print{.calculate-button,.reset-button,.back-link{display:none}.calculator-layout{display:block}.result-panel{position:static;break-inside:avoid}.field{padding:8px 0}}
 
 .probability-estimate{font:normal 44px/1.15 Georgia,serif;letter-spacing:-1px;border-top:1px solid #c9d0bd;padding-top:20px}.probability-label{margin:6px 0 10px}.result-panel .field-help{font-size:12px}.result-panel .field-help a{text-decoration:underline}
+
+.outcome h3{font:600 14px/1.4 Arial,sans-serif;margin:22px 0 12px}.outcome-line{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12px;line-height:1.5}.outcome-line strong{white-space:nowrap;font-size:15px}.outcome-track{height:5px;background:#d9dfce;border-radius:3px;margin:6px 0 12px;overflow:hidden}.outcome-track>div{height:100%;border-radius:3px}.outcome-track .medical{background:#899681}.outcome-track .teer{background:var(--ink)}

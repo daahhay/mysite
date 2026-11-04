@@ -22,7 +22,7 @@ def build_calculators(root, output, frame):
     categories=''.join(f'<option>{esc(c)}</option>' for c in dict.fromkeys(d['category'] for d in definitions))
     body=f'''<section class="calc-hero"><div class="eyebrow"><span class="dot"></span> CLINICAL TOOLS</div><h1>Medical calculators.</h1><p>A focused collection for cardiology and pulmonary embolism.</p></section>
 <div class="library-controls"><label>Find a calculator<input id="calculator-search" type="search" placeholder="Search name, condition or specialty…" autocomplete="off"></label><label>Clinical area<select id="calculator-category"><option value="">All areas</option>{categories}</select></label></div>
-<p id="library-count" class="muted" role="status">8 calculators</p><ol class="calculator-list">{rows}</ol><p id="library-empty" hidden>No matching calculators. Try another name or clinical area.</p>
+<p id="library-count" class="muted" role="status">{len(definitions)} calculators</p><ol class="calculator-list">{rows}</ol><p id="library-empty" hidden>No matching calculators. Try another name or clinical area.</p>
 <p class="clinical-note">For clinical decision support in adults. Interpret results alongside the full clinical assessment and the cited sources.</p>'''
     (target/'index.html').write_text(page('Medical calculators','',body))
     for d in definitions:

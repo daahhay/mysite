@@ -916,5 +916,173 @@
     ],
     "note": "For confirmed acute PE. A low score alone is insufficient to establish suitability for outpatient treatment.",
     "method": "One point each for age >80, cancer, chronic cardiopulmonary disease, heart rate ≥110, systolic BP <100 and oxygen saturation <90%. Zero points indicates lower risk; ≥1 indicates elevated risk."
+  },
+  {
+    "slug": "coapt",
+    "title": "COAPT risk score",
+    "category": "Valvular heart disease",
+    "summary": "Two-year death and heart-failure hospitalization estimates in secondary mitral regurgitation.",
+    "fields": [
+      {
+        "id": "copd",
+        "label": "History of COPD",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "af",
+        "label": "Atrial fibrillation or flutter",
+        "options": [
+          {
+            "value": 0,
+            "label": "No"
+          },
+          {
+            "value": 1,
+            "label": "Yes"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "nyha",
+        "label": "NYHA functional class",
+        "options": [
+          {
+            "value": 0,
+            "label": "I"
+          },
+          {
+            "value": 1,
+            "label": "II"
+          },
+          {
+            "value": 2,
+            "label": "III"
+          },
+          {
+            "value": 3,
+            "label": "IVa"
+          }
+        ],
+        "help": "IVa means ambulatory class IV."
+      },
+      {
+        "id": "egfr",
+        "label": "eGFR",
+        "options": [
+          {
+            "value": 0,
+            "label": ">60"
+          },
+          {
+            "value": 1,
+            "label": "30–60"
+          },
+          {
+            "value": 3,
+            "label": "<30 or dialysis"
+          }
+        ],
+        "help": "mL/min/1.73 m²"
+      },
+      {
+        "id": "lvef",
+        "label": "Left ventricular ejection fraction",
+        "options": [
+          {
+            "value": 2,
+            "label": "<25%"
+          },
+          {
+            "value": 1,
+            "label": "25–35%"
+          },
+          {
+            "value": 0,
+            "label": ">35–50%"
+          }
+        ],
+        "help": "The COAPT trial enrolled patients with LVEF 20–50%."
+      },
+      {
+        "id": "lvesd",
+        "label": "Left ventricular end-systolic dimension",
+        "options": [
+          {
+            "value": 0,
+            "label": "<5.5 cm"
+          },
+          {
+            "value": 2,
+            "label": "5.5–7.0 cm"
+          }
+        ],
+        "help": "LVESD >7.0 cm is outside the COAPT trial eligibility range."
+      },
+      {
+        "id": "rvsp",
+        "label": "Estimated right ventricular systolic pressure",
+        "options": [
+          {
+            "value": 0,
+            "label": "≤45 mmHg / insufficient TR jet"
+          },
+          {
+            "value": 3,
+            "label": ">45 mmHg"
+          }
+        ],
+        "help": ""
+      },
+      {
+        "id": "tr",
+        "label": "Tricuspid regurgitation",
+        "options": [
+          {
+            "value": 0,
+            "label": "None / mild (1+)"
+          },
+          {
+            "value": 1,
+            "label": "Moderate (2+)"
+          },
+          {
+            "value": 2,
+            "label": "Moderate–severe (3+)"
+          },
+          {
+            "value": 3,
+            "label": "Severe (4+)"
+          }
+        ],
+        "help": ""
+      }
+    ],
+    "note": "For patients resembling the COAPT trial population with symptomatic heart failure and moderate-to-severe or severe secondary mitral regurgitation despite guideline-directed medical therapy. Trial event rates are estimates, not an individual prognosis or a treatment recommendation.",
+    "method": "The eight baseline factors sum to 0–15 points. COPD and AF/flutter add 1 each; NYHA III/IVa adds 1; eGFR 30–60 adds 1 and <30 or dialysis adds 3; LVEF 25–35% adds 1 and <25% adds 2; LVESD ≥5.5 cm adds 2; RVSP >45 mmHg adds 3; and TR ≥moderate adds 2. Outcome percentages match the reference calculator’s score groups (0–2, each score 3–9, and ≥10). Both treatment groups use the same baseline score. These observed rates are not a smooth prediction curve and may vary non-monotonically between groups. HFH means heart-failure hospitalization; TEER means transcatheter edge-to-edge repair.",
+    "references": [
+      {
+        "label": "COAPT reference calculator · Mount Sinai / Shah",
+        "url": "https://coaptriskscore.com/coapt-risk-score-calculator/"
+      },
+      {
+        "label": "Shah et al., JACC: Cardiovascular Interventions (2022)",
+        "url": "https://doi.org/10.1016/j.jcin.2022.08.005"
+      },
+      {
+        "label": "COAPT trial eligibility · NCT01626079",
+        "url": "https://clinicaltrials.gov/study/NCT01626079"
+      }
+    ]
   }
 ]

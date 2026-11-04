@@ -25,6 +25,27 @@ const row = (label, points) => ({label, points});
 export function calculate(slug, v) {
   let rows, score;
   switch (slug) {
+    case 'coapt': {
+      rows = [row('COPD',v.copd),row('AF / flutter',v.af),row('NYHA III / IVa',+(v.nyha >= 2)),
+        row('Kidney function',v.egfr),row('LVEF',v.lvef),row('LVESD ≥5.5 cm',v.lvesd),
+        row('RVSP >45 mmHg',v.rvsp),row('TR ≥moderate',v.tr > 0 ? 2 : 0)];
+      score = rows.reduce((sum,r)=>sum+r.points,0);
+      // Observed 2-year rates from the Mount Sinai / Shah reference calculator.
+      // Columns: death, HF hospitalization, death or HF hospitalization.
+      // Rows: baseline score ≤2, 3, 4, 5, 6, 7, 8, 9, ≥10. No treatment subtraction.
+      const medical = [[23.3,27.9,37.0],[23.3,48.4,51.9],[20.8,41.6,51.7],
+        [33.8,44.3,60.6],[40.8,55.0,65.7],[59.4,83.1,89.2],
+        [61.0,62.5,78.2],[62.6,75.9,80.4],[72.7,84.2,91.2]];
+      const teer = [[11.5,19.5,24.8],[14.5,35.6,40.0],[26.2,22.5,34.8],
+        [25.0,27.2,39.0],[27.9,27.2,37.5],[28.8,45.1,57.8],
+        [42.5,45.7,55.4],[48.5,57.3,72.0],[49.0,67.4,70.4]];
+      const index = Math.max(0,Math.min(8,score-2));
+      return {...total(rows,'Two-year outcome estimates',
+        'Observed COAPT trial rates by baseline score. TEER results reflect MitraClip plus guideline-directed medical therapy.',15),
+        scoreGroup: score <= 2 ? '0–2' : score >= 10 ? '≥10' : String(score),
+        outcomes: ['Death','HF hospitalization','Death or HF hospitalization'].map((label,i)=>
+          ({label,medical:medical[index][i],teer:teer[index][i]}))};
+    }
     case 'cha2ds2-vasc':
       rows = [row('Age', v.age >= 75 ? 2 : v.age >= 65 ? 1 : 0), row('Female sex', v.female),
         row('Heart failure', v.hf), row('Hypertension', v.htn), row('Diabetes', v.diabetes),

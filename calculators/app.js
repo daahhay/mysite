@@ -66,6 +66,24 @@ if (form) {
     }
     add(result,'h2',answer.category);
     add(result,'p',answer.detail);
+    if (answer.outcomes) {
+      add(result,'p','Baseline score group: '+answer.scoreGroup,'field-help');
+      const comparison = add(result,'div','','outcome-comparison');
+      for (const outcome of answer.outcomes) {
+        const section = add(comparison,'section','','outcome');
+        add(section,'h3',outcome.label);
+        for (const [label,value,kind] of [['Medical therapy alone',outcome.medical,'medical'],['TEER + medical therapy',outcome.teer,'teer']]) {
+          const line = add(section,'div','','outcome-line');
+          add(line,'span',label);
+          add(line,'strong',value.toFixed(1)+'%');
+          const track = add(section,'div','','outcome-track');
+          track.setAttribute('aria-hidden','true');
+          const bar = add(track,'div','',kind);
+          bar.style.width = value+'%';
+        }
+      }
+      add(result,'p','Trial averages do not guarantee an individual treatment benefit.','field-help');
+    }
     const details = add(result,'details','');
     add(details,'summary',answer.probability ? 'Model contributions' : 'Score breakdown');
     for (const row of answer.rows) {

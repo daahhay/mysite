@@ -55,6 +55,11 @@ for(const definition of definitions) {
  const values=zero(definition.slug);
  if(definition.slug==='hfa-peff') values.ee=8;
  assert.equal(validate(definition,values),'');
+ if (definition.slug==='coapt') {
+  assert.notEqual(validate(definition,{...values,egfr:2}),'');
+  assert.notEqual(validate(definition,{...values,tr:4}),'');
+  continue;
+ }
  assert.notEqual(validate(definition,{...values,age:-1}),'');
  assert.notEqual(validate(definition,{...values,age:NaN}),'');
  assert.notEqual(validate(definition,{...values,age:60.5}),'');
@@ -74,3 +79,29 @@ for(let mask=0;mask<64;mask++){
 }
 assert.equal(seen.size,10);
 console.log('Passed all H2FPEF probability conversions.');
+
+// Check all baseline combinations against the source calculator's grouped rates.
+const coapt=definitions.find(d=>d.slug==='coapt');
+const referenceMedical=[[23.3,27.9,37],[23.3,48.4,51.9],[20.8,41.6,51.7],[33.8,44.3,60.6],[40.8,55,65.7],[59.4,83.1,89.2],[61,62.5,78.2],[62.6,75.9,80.4],[72.7,84.2,91.2]];
+const referenceTeer=[[11.5,19.5,24.8],[14.5,35.6,40],[26.2,22.5,34.8],[25,27.2,39],[27.9,27.2,37.5],[28.8,45.1,57.8],[42.5,45.7,55.4],[48.5,57.3,72],[49,67.4,70.4]];
+const totals=new Set();
+function checkCoapt(index,values){
+ if(index<coapt.fields.length){
+  const f=coapt.fields[index];
+  for(const option of f.options) checkCoapt(index+1,{...values,[f.id]:option.value});
+  return;
+ }
+ assert.equal(validate(coapt,values),'');
+ const expected=values.copd+values.af+(values.nyha>=2?1:0)+values.egfr+values.lvef+values.lvesd+values.rvsp+(values.tr>=1?2:0);
+ const result=calculate('coapt',values);
+ assert.equal(result.score,expected);
+ assert.equal(result.maximum,15);
+ const group=expected<3?0:expected>9?8:expected-2;
+ assert.deepEqual(result.outcomes.map(o=>o.medical),referenceMedical[group]);
+ assert.deepEqual(result.outcomes.map(o=>o.teer),referenceTeer[group]);
+ assert.equal(result.scoreGroup,expected<3?'0–2':expected>9?'≥10':String(expected));
+ totals.add(expected);
+}
+checkCoapt(0,{});
+assert.equal(totals.size,16);
+console.log('Passed COAPT inputs, all 16 scores and both treatment outcome tables.');
