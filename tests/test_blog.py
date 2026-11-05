@@ -27,6 +27,40 @@ class BlogTests(unittest.TestCase):
         (self.root / 'content/blog' / (name + '.json')).write_text(json.dumps(post))
         return post
 
+    def test_article_translations_link_both_directions(self):
+        self.write_post('english', language='en')
+        self.write_post('russian', language='ru', translation_of='english', title='Русская статья', body='<p>Русский текст</p>')
+        blog.build(self.root, self.out)
+        for slug, lang, other in [('english','en','russian'),('russian','ru','english')]:
+            page = (self.out / f'blog/{slug}/index.html').read_text()
+            self.assertIn('class="article-languages"', page)
+            self.assertIn(f'hreflang="{lang}" aria-current="page"', page)
+            self.assertIn(f'href="/blog/{other}/"', page)
+            self.assertIn('rel="alternate" hreflang=', page)
+            self.assertIn(f'<html lang="{lang}">', page)
+        self.assertIn('Русский текст', (self.out / 'blog/russian/index.html').read_text())
+        self.assertNotIn('Русский текст', (self.out / 'blog/english/index.html').read_text())
+
+    def test_draft_or_removed_translation_has_no_switcher(self):
+        self.write_post('english', translation_of='russian')
+        self.write_post('russian', language='ru', published=False, translation_of='english')
+        blog.build(self.root, self.out)
+        page = (self.out / 'blog/english/index.html').read_text()
+        self.assertNotIn('class="article-languages"', page)
+        self.assertNotIn('/blog/russian/', page)
+        (self.root / 'content/blog/russian.json').unlink()
+        self.assertEqual(blog.translation_pairs(blog.load_posts(self.root)), {})
+
+    def test_rejects_conflicting_and_same_language_translations(self):
+        self.write_post('english')
+        self.write_post('russian', translation_of='english')
+        with self.assertRaisesRegex(ValueError, 'other language'):
+            blog.translation_pairs(blog.load_posts(self.root))
+        self.write_post('russian', language='ru', translation_of='english')
+        self.write_post('another', language='ru', translation_of='english')
+        with self.assertRaisesRegex(ValueError, 'More than one translation'):
+            blog.translation_pairs(blog.load_posts(self.root))
+
     def test_builds_real_documents_and_preserves_cv(self):
         self.write_post(references=[{'title': 'Reference', 'url': 'https://example.org/research'}])
         self.write_post('older', date='2026-09-01')

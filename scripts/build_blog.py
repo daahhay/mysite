@@ -287,6 +287,41 @@ def load_posts(root, include_drafts=False):
     return sorted(posts, key=lambda p: (p['date'], p['slug']), reverse=True)
 
 
+def translation_pairs(posts):
+    # Only published entries are passed in production. Draft/deleted targets have no link.
+    by_slug = {post['slug']: post for post in posts}
+    pairs = {}
+    for post in posts:
+        target_slug = post.get('translation_of')
+        if not target_slug:
+            continue
+        if not isinstance(target_slug, str):
+            raise ValueError(f"{post['slug']}: Translation of must be one article")
+        target = by_slug.get(target_slug)
+        if not target:
+            continue
+        if target['language'] == post['language']:
+            raise ValueError(f"{post['slug']}: Select a translation in the other language")
+        for source, other in ((post, target), (target, post)):
+            existing = pairs.get(source['slug'])
+            if existing and existing['slug'] != other['slug']:
+                raise ValueError(f"{source['slug']}: More than one translation is linked; keep one per language")
+            pairs[source['slug']] = other
+    return pairs
+
+
+def language_switcher(post, translation):
+    if not translation:
+        return ''
+    versions = {p['language']: p for p in (post, translation)}
+    label = 'Язык статьи' if post['language'] == 'ru' else 'Article language'
+    links = []
+    for lang, name in (('en', 'English'), ('ru', 'Русский')):
+        current = ' aria-current="page"' if lang == post['language'] else ''
+        links.append(f'<a href="{post_url(versions[lang])}" lang="{lang}" hreflang="{lang}"{current}>{name}</a>')
+    return f'<nav class="article-languages" aria-label="{label}"><span>{label}</span>{"".join(links)}</nav>'
+
+
 def display_date(post):
     d = post['date_object']
     return f'{d.day} {d.strftime("%B")} {d.year}'
@@ -332,12 +367,12 @@ def attachment_links(items, is_ru):
     return f'<section class="attachments"><h2>{heading}</h2><ul>{"".join(links)}</ul></section>'
 
 
-def article_page(post, newer=None, older=None, preview=False):
+def article_page(post, newer=None, older=None, preview=False, translation=None):
     is_ru = post['language'] == 'ru'
     toc_label = 'В ЭТОЙ СТАТЬЕ' if is_ru else 'IN THIS ARTICLE'
     refs_label = 'Источники и ссылки' if is_ru else 'References & further reading'
     meta = f'<div class="post-meta"><span class="topic">{esc(post.get("category") or "Notes")}</span><span>·</span><time datetime="{post["date"]}">{display_date(post)}</time><span>· {post["minutes"]} min read</span></div>'
-    title = f'''<div class="breadcrumb"><a href="/blog/">← All articles</a></div><div class="article-head">{meta}<h1>{esc(post['title'])}</h1><div class="article-deck introduction">{post['excerpt_html']}</div>{taxonomy_links(post)}</div>'''
+    title = f'''<div class="breadcrumb"><a href="/blog/">← All articles</a></div><div class="article-head">{language_switcher(post, translation)}{meta}<h1>{esc(post['title'])}</h1><div class="article-deck introduction">{post['excerpt_html']}</div>{taxonomy_links(post)}</div>'''
     cover = ''
     if post.get('cover'):
         cover = f'<figure class="article-cover"><img src="{esc(safe_url(post["cover"], media=True))}" alt="{esc(post.get("cover_alt"))}">' + (f'<figcaption>{esc(post["cover_caption"])}</figcaption>' if post.get('cover_caption') else '') + '</figure>'
@@ -353,7 +388,11 @@ def article_page(post, newer=None, older=None, preview=False):
     navigation += (f'<a href="{post_url(older)}"><span>OLDER ARTICLE →</span>{esc(older["title"])}</a>' if older else '<a href="/blog/"><span>KEEP EXPLORING</span>All articles →</a>')
     navigation += '</nav>'
     banner = '<div class="draft-banner">LOCAL PREVIEW · This draft is not published</div>' if preview and not post.get('published') else ''
-    return frame(post['title'], post['excerpt_text'], post_url(post), banner + title + cover + attachment_links(post["attachments"], is_ru) + body + navigation, lang=post['language'], noindex=preview)
+    page = frame(post['title'], post['excerpt_text'], post_url(post), banner + title + cover + attachment_links(post["attachments"], is_ru) + body + navigation, lang=post['language'], noindex=preview)
+    if translation:
+        alternates = ''.join(f'<link rel="alternate" hreflang="{p["language"]}" href="{ORIGIN}{post_url(p)}">' for p in (post, translation))
+        page = page.replace('</head>', alternates + '</head>')
+    return page
 
 
 def palette_panel():
@@ -377,7 +416,7 @@ def palette_panel():
 
 
 def editor_page():
-    return frame('Manage your blog', 'Write, illustrate and publish your articles.', '/blog/edit/', '''<section class="editor-intro"><a class="eyebrow" href="/blog/">← BACK TO THE BLOG</a><h1>Your writing desk.</h1><p>Write an article, add pictures and videos, then publish when you’re ready.</p><a class="button" href="https://app.pagescms.org/">Open visual editor <span>↗</span></a>''' + palette_panel() + '''<ol class="editor-steps"><li><h2>Connect once</h2><p>Sign in to Pages CMS with GitHub. Install its GitHub app for <strong>daahhay/mysite</strong>, then open that repository and choose <strong>main</strong>. The article editor is already configured.</p></li><li><h2>Write & illustrate</h2><p>Open <strong>Blog articles</strong>, then add an article or edit the draft template. Enter a title, page address and short introduction. Use the formatting toolbar for headings, links and pictures. Add video links or upload short MP4/WebM clips under <strong>Additional sections & videos</strong>. Add sources under <strong>References & useful links</strong>.</p></li><li><h2>Save a draft or publish</h2><p>Keep <strong>Publish on website</strong> off while writing. Turn it on and save when ready. Your article appears at <strong>/blog/your-page-address/</strong> after deployment finishes, usually within a few minutes. Turn it off and save to remove the article from the website.</p></li></ol><div class="editor-note"><strong>Drafts & media</strong><p>Drafts stay off the website, but this GitHub repository is public: draft files and uploaded media can be read there. Use YouTube or Vimeo links for large videos. Article dates are display dates, not a publishing schedule.</p></div><p><a href="https://github.com/daahhay/mysite/actions">Check publishing status ↗</a> · <a href="https://pagescms.org/docs/quick-start/">Editor setup help ↗</a></p></section>''', noindex=True)
+    return frame('Manage your blog', 'Write, illustrate and publish your articles.', '/blog/edit/', '''<section class="editor-intro"><a class="eyebrow" href="/blog/">← BACK TO THE BLOG</a><h1>Your writing desk.</h1><p>Write an article, add pictures and videos, then publish when you’re ready.</p><a class="button" href="https://app.pagescms.org/">Open visual editor <span>↗</span></a>''' + palette_panel() + '''<ol class="editor-steps"><li><h2>Connect once</h2><p>Sign in to Pages CMS with GitHub. Install its GitHub app for <strong>daahhay/mysite</strong>, then open that repository and choose <strong>main</strong>. The article editor is already configured.</p></li><li><h2>Write & illustrate</h2><p>Open <strong>Blog articles</strong>, then add an article or edit the draft template. Enter a title, page address and short introduction. Use the formatting toolbar for headings, links and pictures. Add video links or upload short MP4/WebM clips under <strong>Additional sections & videos</strong>. Add sources under <strong>References & useful links</strong>.</p></li><li><h2>Add a translation</h2><p>Create a separate article with a unique page address (for example, arterial-lines-ru). Set <strong>Article language</strong> to the other language, write the translated title, introduction and article, then choose the original in <strong>Translation of</strong>. Link once only. When both versions are published, an <strong>English / Русский</strong> switcher appears above the title on both pages. Each version can have its own pictures, attachments and references.</p></li><li><h2>Save a draft or publish</h2><p>Keep <strong>Publish on website</strong> off while writing. Turn it on and save when ready. Your article appears at <strong>/blog/your-page-address/</strong> after deployment finishes, usually within a few minutes. Turn it off and save to remove the article from the website.</p></li></ol><div class="editor-note"><strong>Drafts & media</strong><p>Drafts stay off the website, but this GitHub repository is public: draft files and uploaded media can be read there. Use YouTube or Vimeo links for large videos. Article dates are display dates, not a publishing schedule.</p></div><p><a href="https://github.com/daahhay/mysite/actions">Check publishing status ↗</a> · <a href="https://pagescms.org/docs/quick-start/">Editor setup help ↗</a></p></section>''', noindex=True)
 
 
 IMAGE_LOADER = """<style>
@@ -438,6 +477,7 @@ def build(root, output, include_drafts=False):
     if output == root or output in root.parents:
         raise ValueError('Output must not overwrite source')
     posts = load_posts(root, include_drafts)
+    translations = translation_pairs(posts)
     if output.exists():
         if not (output / '.blog-generated').exists():
             raise ValueError('Refusing to replace a directory not created by this builder')
@@ -467,7 +507,7 @@ def build(root, output, include_drafts=False):
         target.mkdir()
         newer = posts[index - 1] if index else None
         older = posts[index + 1] if index + 1 < len(posts) else None
-        (target / 'index.html').write_text(article_page(post, newer, older, include_drafts), encoding='utf-8')
+        (target / 'index.html').write_text(article_page(post, newer, older, include_drafts, translations.get(post['slug'])), encoding='utf-8')
     if (root / 'calculators/data.json').exists():
         import runpy
         calculator_builder = runpy.run_path(str(root / 'scripts/build_calculators.py'))

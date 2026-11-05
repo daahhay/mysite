@@ -13,7 +13,7 @@ content:
     subfolders: false
     view:
       primary: title
-      fields: [title, published, date, category]
+      fields: [title, language, published, date, category]
       sort: date
       order: desc
     fields:
@@ -47,6 +47,15 @@ content:
               label: English
             - name: ru
               label: Русский
+      - name: translation_of
+        label: Translation of
+        type: reference
+        description: "For a translated article, select the original article in the other language. Link once only; both published pages get an English / Русский switcher. Use a unique page address for each version, e.g. arterial-lines and arterial-lines-ru. Leave blank for an unrelated article."
+        options:
+          collection: posts
+          search: fields.title,fields.slug
+          value: "{fields.slug}"
+          label: "{primary} ({fields.language})"
       - name: category
         label: Primary topic
         type: reference
