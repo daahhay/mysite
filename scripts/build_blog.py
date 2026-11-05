@@ -187,6 +187,7 @@ def video_block(url, caption=''):
 
 
 def frame(title, description, path, content, lang='en', noindex=False):
+    section_link = '<a href="/blog/">Blog ↗</a>' if path.startswith('/calculators/') else '<a href="/calculators/">Calculators ↗</a>'
     return f'''<!doctype html>
 <html lang="{esc(lang)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(title)} | Tamerlan Erdniev</title><meta name="description" content="{esc(description)}">
@@ -194,7 +195,7 @@ def frame(title, description, path, content, lang='en', noindex=False):
 <meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{ORIGIN}{path}"><meta property="og:type" content="{'article' if path not in ('/blog/', '/blog/edit/') else 'website'}">
 <link rel="shortcut icon" href="/blog/favicon.ico?v=20261104-3"><link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48 96x96" href="/blog/favicon.ico?v=20261104-3"><link rel="icon" type="image/png" sizes="16x16" href="/blog/favicon-16.png?v=20261104-3"><link rel="icon" type="image/png" sizes="32x32" href="/blog/favicon-32.png?v=20261104-3"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest"><meta name="theme-color" content="#f7f6f0"><meta name="apple-mobile-web-app-title" content="Tamerlan"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/blog/blog.css">
 </head><body><a class="skip" href="#main">Skip to content</a>
-<header class="blog-header"><div class="wordmark" aria-label="Tamerlan Erdniev"><span class="brand"><img src="/logo.svg" alt="Tamerlan Erdniev logo" width="31.53515625" height="46" style="display:block"></span><span class="owner-name">Tamerlan Erdniev</span></div></header>
+<header class="blog-header"><div class="wordmark" aria-label="Tamerlan Erdniev"><span class="brand"><img src="/logo.svg" alt="Tamerlan Erdniev logo" width="31.53515625" height="46" style="display:block"></span><span class="owner-name">Tamerlan Erdniev</span></div><nav class="section-navigation" aria-label="Explore">{section_link}</nav></header>
 <main class="blog-main" id="main">{content}</main>
 <footer class="blog-footer"><span>Tamerlan Erdniev</span><a href="/blog/edit/">Manage blog ↗</a></footer>
 </body></html>'''
