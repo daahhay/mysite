@@ -1,0 +1,18 @@
+{
+  "title": "Cardiogenic Shock 2026 Update by CSWG",
+  "slug": "CS-2026-CSWG-update",
+  "published": false,
+  "date": "2026-11-05",
+  "language": "en",
+  "new_topics": [
+    "Cardiogenic Shock"
+  ],
+  "excerpt": "<p><a href=\"https://doi.org/10.1016/j.cardfail.2026.10.004\">A new 2026 report from the Cardiogenic Shock Working Group (CSWG)</a>, published in the <em>Journal of Cardiac Failure</em>, proposes an updated staging system designed to make assessment of shock severity simpler, more objective, and applicable across different clinical settings.</p>",
+  "attachments": [
+    {
+      "file": "/media/blog/piis1071916426006342.pdf",
+      "title": "Article"
+    }
+  ],
+  "body": "<h2>Why Was an Update Needed?</h2><p>The original Society for Cardiovascular Angiography and Interventions (SCAI) staging system, introduced in 2019, established a common language for describing cardiogenic shock severity from stage A (at risk) to stage E (extremis).</p><p>In 2022, the CSWG introduced more objective thresholds using several clinical variables, including blood pressure, lactate, pH, alanine aminotransferase (ALT), and the intensity of circulatory support.</p><p>However, some limitations remained:</p><ul><li><p>Certain clinical presentations were not adequately captured by existing lactate thresholds.</p></li><li><p>Classification relied on multiple variables, increasing complexity.</p></li><li><p>Out-of-hospital cardiac arrest automatically triggered stage E classification, regardless of subsequent hemodynamic recovery.</p></li><li><p>Treatment intensity and its relationship to severity required further clarification.</p></li></ul><p>The 2026 update addresses these limitations using a much larger contemporary dataset.</p><h2>The Study: Evidence From Nearly 1.5 Million Patients</h2><p>Investigators analyzed 11,640 patients enrolled in the multicenter CSWG registry between 2021 and 2025, including patients with heart failure-related cardiogenic shock (HF-CS) and myocardial infarction-related cardiogenic shock (MI-CS).</p><p>They examined relationships between clinical parameters, treatment intensity, and in-hospital mortality, including serial measurements during the first 72 hours after shock diagnosis.</p><p>The revised classification was then evaluated in an independent population of 1,417,637 patients across 161 hospitals in 20 US states.</p><p>The aim was not to create a complex mortality prediction score, but to improve the practicality and consistency of bedside shock classification.</p><h2>What Has Changed in the 2026 Classification?</h2><h3></h3><p></p>"
+}
