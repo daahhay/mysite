@@ -187,7 +187,10 @@ def video_block(url, caption=''):
 
 
 def frame(title, description, path, content, lang='en', noindex=False):
-    section_link = '<a href="/blog/">Blog</a>' if path.startswith('/calculators/') else '<a href="/calculators/">Calculators</a>'
+    section_link = ''.join(
+        f'<a href="{ORIGIN}{url}"' + (' aria-current="location"' if path.startswith(url) else '') + f'>{label}</a>'
+        for url, label in (('/blog/', 'Blog'), ('/calculators/', 'Calculators'))
+    )
     return f'''<!doctype html>
 <html lang="{esc(lang)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(title)} | Tamerlan Erdniev</title><meta name="description" content="{esc(description)}">
