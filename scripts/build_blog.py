@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Build static blog documents for GitHub Pages. No runtime service or dependencies."""
 import argparse
+import hashlib
 import html
 from html.parser import HTMLParser
 import json
@@ -516,8 +517,18 @@ def build(root, output, include_drafts=False):
         import runpy
         calculator_builder = runpy.run_path(str(root / 'scripts/build_calculators.py'))
         calculator_builder['build_calculators'](root, output, frame)
+    # Change stylesheet URLs whenever their contents change, avoiding stale headers.
+    css_versions = { '/' + p.relative_to(output).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()[:12]
+                     for p in output.rglob('*.css') }
     for page in output.rglob('*.html'):
         html = page.read_text(encoding='utf-8')
+        def version_stylesheet(match):
+            href = match.group(1)
+            asset = href.split('?', 1)[0]
+            absolute = asset if asset.startswith('/') else '/' + (page.parent.relative_to(output) / asset).as_posix()
+            version = css_versions.get(absolute)
+            return f'href="{asset}?v={version}"' if version else match.group(0)
+        html = re.sub(r'href="([^"?#]+\.css(?:\?[^"#]*)?)"', version_stylesheet, html)
         if '</head>' in html and 'rel="icon"' not in html:
             html = html.replace('</head>', '<link rel="shortcut icon" href="/favicon.ico?v=20261104-2"><link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48 96x96" href="/favicon.ico?v=20261104-2"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png?v=20261104-2"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=20261104-2"></head>', 1)
         if '<body>' in html and 'http-equiv="refresh"' not in html.lower():
