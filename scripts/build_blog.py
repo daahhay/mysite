@@ -236,11 +236,30 @@ def taxonomy_links(post):
     return '<div class="taxonomy-links" aria-label="Topics and tags">' + ''.join(links) + '</div>'
 
 
+def article_versions(root):
+    for file in sorted((root / 'content/blog').glob('*.json')):
+        original = json.loads(file.read_text(encoding='utf-8'))
+        if not isinstance(original, dict):
+            raise ValueError(f'{file.name}: Article must be an object')
+        yield file, dict(original)
+        translation = original.get('translation')
+        if not translation:
+            continue
+        if not isinstance(translation, dict):
+            raise ValueError(f'{file.name}: Translation must be an object')
+        language = 'ru' if original.get('language', 'en') == 'en' else 'en'
+        translated = {key: original.get(key) for key in ('date','category','topics','new_topics','tags','cover','cover_alt','cover_caption')}
+        translated.update(translation)
+        translated.update(language=language, slug=translation.get('slug') or original['slug'] + '-' + language,
+                          translation_of=original['slug'],
+                          published=original.get('published') is True and translation.get('published') is True)
+        yield file, translated
+
+
 def load_posts(root, include_drafts=False):
     posts, slugs = [], set()
-    for file in sorted((root / 'content/blog').glob('*.json')):
+    for file, post in article_versions(root):
         try:
-            post = json.loads(file.read_text(encoding='utf-8'))
             if not isinstance(post, dict):
                 raise ValueError('Article must be an object')
             if post.get('published') is not True and not include_drafts:
@@ -332,16 +351,30 @@ def display_date(post):
     return f'{d.day} {d.strftime("%B")} {d.year}'
 
 
-def card(post):
+def card(post, translation=None, group=None, hidden=False):
     url, title = post_url(post), esc(post['title'])
     category = esc(post.get('category') or 'Notes')
     image = (f'<img src="{esc(safe_url(post["cover"], media=True))}" alt="{esc(post.get("cover_alt"))}" loading="lazy" width="800" height="450">' if post.get('cover') else f'<div class="cover-type" aria-hidden="true"><span>{category.upper()}</span><strong>te.</strong><span>FROM THE NOTEBOOK</span></div>')
-    return f'''<article class="post-card" data-language="{post['language']}" data-topics="{esc(json.dumps(post['topics'], ensure_ascii=False))}" data-tags="{esc(json.dumps(post['tags'], ensure_ascii=False))}"><a class="post-cover" href="{url}" aria-label="{title}">{image}</a>
+    return f'''<article class="post-card" data-language="{post['language']}" data-group="{esc(group or post['slug'])}" {"hidden" if hidden else ""} data-topics="{esc(json.dumps(post['topics'], ensure_ascii=False))}" data-tags="{esc(json.dumps(post['tags'], ensure_ascii=False))}"><a class="post-cover" href="{url}" aria-label="{title}">{image}</a>
 <div class="post-meta"><span class="topic">{category}</span><span>·</span><time datetime="{post['date']}">{display_date(post)}</time><span>· {post['minutes']} min read</span></div>
-<h2 lang="{post['language']}"><a href="{url}">{title}</a></h2><div class="introduction" lang="{post['language']}">{post['excerpt_html']}</div>{taxonomy_links(post)}<a class="read-link" href="{url}" aria-label="Read {title}">Read article <span aria-hidden="true">↗</span></a></article>'''
+<h2 lang="{post['language']}"><a href="{url}">{title}</a></h2><div class="introduction" lang="{post['language']}">{post['excerpt_html']}</div>{taxonomy_links(post)}{language_switcher(post, translation)}<a class="read-link" href="{url}" aria-label="Read {title}">Read article <span aria-hidden="true">↗</span></a></article>'''
 
 
 def index_page(posts):
+    pairs = translation_pairs(posts)
+    seen, cards = set(), []
+    for post in posts:
+        other = pairs.get(post['slug'])
+        group = min(post['slug'], other['slug']) if other else post['slug']
+        if group in seen:
+            continue
+        seen.add(group)
+        # Prefer the original entry, while filters can show its translated version.
+        primary = other if other and post.get('translation_of') == other['slug'] else post
+        secondary = post if primary is other else other
+        cards.append(card(primary, secondary, group))
+        if secondary:
+            cards.append(card(secondary, primary, group, hidden=True))
     hero = '''<section class="blog-hero"><div><div class="eyebrow"><span class="dot"></span> THE NOTEBOOK</div><h1>Blog.</h1><p>Notes, perspectives, and a closer look at cardiology and clinical research.</p></div><div class="blog-note">A place to explore<br>ideas in more depth.<span>THE BLOG OF TAMERLAN ERDNIEV</span></div></section>'''
     if not posts:
         body = '''<section class="blog-empty"><div class="empty-mark" aria-hidden="true">01</div><div><div class="eyebrow">A NEW CHAPTER</div><h2>The notebook is open.</h2><p>New articles will appear here.</p></div></section>'''
@@ -351,7 +384,7 @@ def index_page(posts):
         options = ''.join(f'<option value="{esc(t)}">{esc(t)}</option>' for t in topics)
         tag_options = ''.join(f'<option value="{esc(t)}">{esc(t)}</option>' for t in tags)
         body = f'''<div class="blog-toolbar"><label for="article-search">SEARCH <input id="article-search" type="search" placeholder="Articles, topics, tags…" autocomplete="off"></label><label for="article-topic">TOPIC <select id="article-topic"><option value="">All topics</option>{options}</select></label><label for="article-tag">TAG <select id="article-tag"><option value="">All tags</option>{tag_options}</select></label><label for="article-language">LANGUAGE <select id="article-language"><option value="">All languages</option><option value="en">English</option><option value="ru">Русский</option></select></label><button class="reset-filters" id="clear-filters" type="button">Clear filters</button></div>
-<p class="result-count" id="result-count" role="status">{len(posts)} articles</p><div class="post-grid">{''.join(card(p) for p in posts)}</div>
+<p class="result-count" id="result-count" role="status">{len(seen)} articles</p><div class="post-grid">{''.join(cards)}</div>
 <div class="no-results" id="no-results" hidden><h2>No matching articles</h2><p>Try another search, topic, tag or language, or clear the filters above.</p></div><script src="/blog/blog.js" defer></script>'''
     return frame('Blog', 'Notes, perspectives and articles by Tamerlan Erdniev.', '/blog/', hero + body)
 
@@ -421,7 +454,7 @@ def palette_panel():
 
 
 def editor_page():
-    return frame('Manage your blog', 'Write, illustrate and publish your articles.', '/blog/edit/', '''<section class="editor-intro"><a class="eyebrow" href="/blog/">← BACK TO THE BLOG</a><h1>Your writing desk.</h1><p>Write an article, add pictures and videos, then publish when you’re ready.</p><a class="button" href="https://app.pagescms.org/">Open visual editor <span>↗</span></a>''' + palette_panel() + '''<ol class="editor-steps"><li><h2>Connect once</h2><p>Sign in to Pages CMS with GitHub. Install its GitHub app for <strong>daahhay/mysite</strong>, then open that repository and choose <strong>main</strong>. The article editor is already configured.</p></li><li><h2>Write & illustrate</h2><p>Open <strong>Blog articles</strong>, then add an article or edit the draft template. Enter a title, page address and short introduction. Use the formatting toolbar for headings, links and pictures. Add video links or upload short MP4/WebM clips under <strong>Additional sections & videos</strong>. Add sources under <strong>References & useful links</strong>.</p></li><li><h2>Add a translation</h2><p>Create a separate article with a unique page address (for example, arterial-lines-ru). Set <strong>Article language</strong> to the other language, write the translated title, introduction and article, then choose the original in <strong>Translation of</strong>. Link once only. When both versions are published, an <strong>English / Русский</strong> switcher appears above the title on both pages. Each version can have its own pictures, attachments and references.</p></li><li><h2>Save a draft or publish</h2><p>Keep <strong>Publish on website</strong> off while writing. Turn it on and save when ready. Your article appears at <strong>/blog/your-page-address/</strong> after deployment finishes, usually within a few minutes. Turn it off and save to remove the article from the website.</p></li></ol><div class="editor-note"><strong>Drafts & media</strong><p>Drafts stay off the website, but this GitHub repository is public: draft files and uploaded media can be read there. Use YouTube or Vimeo links for large videos. Article dates are display dates, not a publishing schedule.</p></div><p><a href="https://github.com/daahhay/mysite/actions">Check publishing status ↗</a> · <a href="https://pagescms.org/docs/quick-start/">Editor setup help ↗</a></p></section>''', noindex=True)
+    return frame('Manage your blog', 'Write, illustrate and publish your articles.', '/blog/edit/', '''<section class="editor-intro"><a class="eyebrow" href="/blog/">← BACK TO THE BLOG</a><h1>Your writing desk.</h1><p>Write an article, add pictures and videos, then publish when you’re ready.</p><a class="button" href="https://app.pagescms.org/">Open visual editor <span>↗</span></a>''' + palette_panel() + '''<ol class="editor-steps"><li><h2>Connect once</h2><p>Sign in to Pages CMS with GitHub. Install its GitHub app for <strong>daahhay/mysite</strong>, then open that repository and choose <strong>main</strong>. The article editor is already configured.</p></li><li><h2>Write & illustrate</h2><p>Open <strong>Blog articles</strong>, then add an article or edit the draft template. Enter a title, page address and short introduction. Use the formatting toolbar for headings, links and pictures. Add video links or upload short MP4/WebM clips under <strong>Additional sections & videos</strong>. Add sources under <strong>References & useful links</strong>.</p></li><li><h2>Add a translation</h2><p>Open the same article and fill in <strong>Translation (other language)</strong> below the main content. Add the translated title, introduction and body, plus any translated attachments or videos. The other language is selected automatically. Turn on <strong>Publish translated version</strong> when ready and save. The blog shows one article with English / Русский links, and both versions have a language switcher. No second article entry is needed.</p></li><li><h2>Save a draft or publish</h2><p>Keep <strong>Publish on website</strong> off while writing. Turn it on and save when ready. Your article appears at <strong>/blog/your-page-address/</strong> after deployment finishes, usually within a few minutes. Turn it off and save to remove the article from the website.</p></li></ol><div class="editor-note"><strong>Drafts & media</strong><p>Drafts stay off the website, but this GitHub repository is public: draft files and uploaded media can be read there. Use YouTube or Vimeo links for large videos. Article dates are display dates, not a publishing schedule.</p></div><p><a href="https://github.com/daahhay/mysite/actions">Check publishing status ↗</a> · <a href="https://pagescms.org/docs/quick-start/">Editor setup help ↗</a></p></section>''', noindex=True)
 
 
 IMAGE_LOADER = """<style>
@@ -519,7 +552,7 @@ def build(root, output, include_drafts=False):
         calculator_builder['build_calculators'](root, output, frame)
     # Change stylesheet URLs whenever their contents change, avoiding stale headers.
     css_versions = { '/' + p.relative_to(output).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()[:12]
-                     for p in output.rglob('*.css') }
+                     for p in list(output.rglob('*.css')) + list(output.rglob('*.js')) }
     for page in output.rglob('*.html'):
         html = page.read_text(encoding='utf-8')
         def version_stylesheet(match):
@@ -529,6 +562,7 @@ def build(root, output, include_drafts=False):
             version = css_versions.get(absolute)
             return f'href="{asset}?v={version}"' if version else match.group(0)
         html = re.sub(r'href="([^"?#]+\.css(?:\?[^"#]*)?)"', version_stylesheet, html)
+        html = re.sub(r'src="([^"?#]+\.js(?:\?[^"#]*)?)"', lambda m: version_stylesheet(m).replace('href=', 'src=', 1), html)
         if '</head>' in html and 'rel="icon"' not in html:
             html = html.replace('</head>', '<link rel="shortcut icon" href="/favicon.ico?v=20261104-2"><link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48 96x96" href="/favicon.ico?v=20261104-2"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png?v=20261104-2"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=20261104-2"></head>', 1)
         if '<body>' in html and 'http-equiv="refresh"' not in html.lower():

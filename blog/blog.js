@@ -16,13 +16,15 @@
   function filter() {
     const words = normalize(search.value).split(/\s+/).filter(Boolean);
     let shown = 0;
+    const shownGroups = new Set();
     for (const card of cards) {
-      const matches = (!language.value || card.element.dataset.language === language.value) &&
+      const group = card.element.dataset.group;
+      const matches = !shownGroups.has(group) && (!language.value || card.element.dataset.language === language.value) &&
         words.every(word => card.text.includes(word)) &&
         (!topic.value || card.topics.includes(normalize(topic.value))) &&
         (!tag.value || card.tags.includes(normalize(tag.value)));
       card.element.hidden = !matches;
-      if (matches) shown++;
+      if (matches) {shown++; shownGroups.add(group);}
     }
     count.textContent = `${shown} ${shown === 1 ? 'article' : 'articles'}`;
     empty.hidden = shown > 0;

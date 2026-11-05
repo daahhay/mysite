@@ -27,6 +27,21 @@ class BlogTests(unittest.TestCase):
         (self.root / 'content/blog' / (name + '.json')).write_text(json.dumps(post))
         return post
 
+    def test_inline_translation_is_one_listing_with_two_versions(self):
+        self.write_post('original', language='ru', translation=dict(published=True, slug='existing-english-address', title='English title', excerpt='English introduction', body='<p>English body</p>'))
+        blog.build(self.root, self.out)
+        index = (self.out / 'blog/index.html').read_text()
+        self.assertIn('>1 articles</p>', index)
+        self.assertEqual(index.count('class="post-card"'), 2)
+        self.assertEqual(index.count(' hidden data-topics='), 1)
+        english = (self.out / 'blog/existing-english-address/index.html').read_text()
+        self.assertIn('English body', english)
+        self.assertIn('href="/blog/original/"', english)
+        self.write_post('original', language='ru', translation=dict(published=False, title='Unpublished translation', excerpt='Draft', body='Draft'))
+        blog.build(self.root, self.out)
+        self.assertNotIn('Unpublished translation', (self.out / 'blog/index.html').read_text())
+        self.assertFalse((self.out / 'blog/existing-english-address').exists())
+
     def test_article_translations_link_both_directions(self):
         self.write_post('english', language='en')
         self.write_post('russian', language='ru', translation_of='english', title='Русская статья', body='<p>Русский текст</p>')
