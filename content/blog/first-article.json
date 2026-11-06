@@ -1,7 +1,7 @@
 {
   "title": "Hemodynamic Effects of Anesthetics, Sedatives, and Analgesics in the CICU: JACC State-of-the-Art Review",
   "slug": "cicu-anesthetics-sedatives-analgesics",
-  "published": true,
+  "published": false,
   "date": "2026-10-31",
   "language": "en",
   "category": "Hemodynamic Effects of Anesthetics, Sedatives, and Analgesics in the CICU",
@@ -48,5 +48,10 @@
       "title": "[7] - Monge Garcia MI, Jian Z, Settels JJ, et al. Performance comparison of ventricular and arterial dP/dtmax for assessing left ventricular systolic function during different experimental loading and contractile conditions. Crit Care. 2018;22(1):325.",
       "url": "https://doi.org/10.1186/s13054-018-2260-1"
     }
-  ]
+  ],
+  "translation": {
+    "published": false,
+    "excerpt": "<p></p>",
+    "body": "<p></p>"
+  }
 }
