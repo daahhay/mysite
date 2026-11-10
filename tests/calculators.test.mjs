@@ -60,6 +60,7 @@ for(const definition of definitions) {
   assert.notEqual(validate(definition,{...values,tr:4}),'');
   continue;
  }
+ if (definition.slug==='intertak') continue;
  assert.notEqual(validate(definition,{...values,age:-1}),'');
  assert.notEqual(validate(definition,{...values,age:NaN}),'');
  assert.notEqual(validate(definition,{...values,age:60.5}),'');
@@ -105,3 +106,26 @@ function checkCoapt(index,values){
 checkCoapt(0,{});
 assert.equal(totals.size,16);
 console.log('Passed COAPT inputs, all 16 scores and both treatment outcome tables.');
+
+// Original InterTAK weights and consensus Figure 1 threshold; exercise all 128 patterns.
+const intertak=definitions.find(d=>d.slug==='intertak');
+const intertakKeys=['female','emotional','physical','no_st_depression','psychiatric','neurologic','qtc'];
+const intertakWeights=[25,24,13,12,11,9,6];
+const intertakSeen=new Set();
+for(let mask=0;mask<128;mask++){
+ const values=Object.fromEntries(intertakKeys.map((key,i)=>[key,(mask>>i)&1]));
+ const expected=intertakWeights.reduce((sum,w,i)=>sum+(((mask>>i)&1)?w:0),0);
+ const result=calculate('intertak',values);
+ assert.equal(validate(intertak,values),'');
+ assert.equal(result.score,expected);
+ assert.equal(result.maximum,100);
+ assert.equal(result.category,expected>70?'High probability of TTS':'Low/intermediate probability of TTS');
+ intertakSeen.add(expected);
+}
+for(const n of [0,70,71,100]) assert.ok(intertakSeen.has(n));
+for(const key of intertakKeys){
+ const base=Object.fromEntries(intertakKeys.map(k=>[k,0]));
+ for(const bad of [null,2,NaN]) assert.notEqual(validate(intertak,{...base,[key]:bad}),'');
+}
+assert.equal(calculate('intertak',{...zero('intertak'),no_st_depression:1}).score,12);
+console.log('Passed all 128 InterTAK combinations, ECG direction and 70/71 boundary.');

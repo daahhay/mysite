@@ -16,7 +16,7 @@ def build_calculators(root, output, frame):
         url = '/calculators/' + (slug + '/' if slug else '')
         rendered = frame(title, 'Clinical calculators for cardiology and pulmonary embolism.',url,body)
         rendered = rendered.replace('<link rel="stylesheet" href="/blog/blog.css">','<link rel="stylesheet" href="/blog/blog.css"><link rel="stylesheet" href="/calculators/calculators.css">')
-        rendered = rendered.replace('<a href="/blog/edit/">Manage blog ↗</a>','<span>Clinical tools · Sources reviewed 4 November 2026</span>')
+        rendered = rendered.replace('<a href="/blog/edit/">Manage blog ↗</a>','<span>Clinical tools · References on each calculator</span>')
         return rendered.replace('</body>','<script type="module" src="/calculators/app.js"></script></body>')
     rows = ''.join(f'<li class="calculator-row" data-category="{esc(d["category"])}" data-search="{esc(d["title"]+" "+d["slug"]+" "+d["summary"]+" "+d["category"])}"><a href="/calculators/{d["slug"]}/"><span class="row-number">{i+1:02}</span><div><h2>{esc(d["title"])}</h2><p>{esc(d["summary"])}</p><span class="category">{esc(d["category"])}</span></div><span class="row-arrow" aria-hidden="true">↗</span></a></li>' for i,d in enumerate(definitions))
     categories=''.join(f'<option>{esc(c)}</option>' for c in dict.fromkeys(d['category'] for d in definitions))
@@ -48,7 +48,7 @@ def build_calculators(root, output, frame):
 <div class="calculator-layout"><form id="calculator-form" novalidate><div class="form-heading"><h2>Patient inputs</h2><button type="reset" class="reset-button">Reset</button></div><p class="muted">Complete each required input. Results are calculated in this browser.</p>
 {''.join(fields)}<p id="form-error" class="form-error" role="alert" tabindex="-1"></p><button type="submit" class="calculate-button">Calculate result <span aria-hidden="true">↗</span></button></form>
 <aside class="result-panel" aria-label="Calculator result"><div id="calculator-result" aria-live="polite"><span class="eyebrow">RESULT</span><h2>Ready when you are.</h2><p>Enter patient information and select Calculate result.</p></div></aside></div>
-<section class="calculator-evidence"><h2>How it works</h2><p>{esc(d["method"])}</p><h2>Sources</h2><ul>{refs}</ul><p class="muted">Reviewed 4 November 2026. Supports clinical reasoning; confirm findings and use current local guidance.</p></section>
+<section class="calculator-evidence"><h2>How it works</h2><p>{esc(d["method"])}</p><h2>Sources</h2><ul>{refs}</ul><p class="muted">Reviewed {esc(d.get('reviewed', '4 November 2026'))}. Supports clinical reasoning; confirm findings and use current local guidance.</p></section>
 <script type="application/json" id="calculator-definition">{payload}</script><noscript><p>Enable JavaScript to calculate results.</p></noscript>'''
         folder=target/d['slug'];folder.mkdir()
         (folder/'index.html').write_text(page(d['title'],d['slug'],body))

@@ -1084,5 +1084,131 @@
         "url": "https://clinicaltrials.gov/study/NCT01626079"
       }
     ]
+  },
+  {
+    "slug": "intertak",
+    "title": "InterTAK Diagnostic Score",
+    "category": "Takotsubo syndrome",
+    "summary": "Clinical and ECG score to help distinguish Takotsubo syndrome from acute coronary syndrome.",
+    "reviewed": "10 November 2026",
+    "fields": [
+      {
+        "id": "female",
+        "label": "Female sex",
+        "help": "",
+        "options": [
+          {
+            "value": 0,
+            "label": "No · 0 points"
+          },
+          {
+            "value": 1,
+            "label": "Yes · 25 points"
+          }
+        ]
+      },
+      {
+        "id": "emotional",
+        "label": "Emotional trigger",
+        "help": "A preceding emotional stressor.",
+        "options": [
+          {
+            "value": 0,
+            "label": "No · 0 points"
+          },
+          {
+            "value": 1,
+            "label": "Yes · 24 points"
+          }
+        ]
+      },
+      {
+        "id": "physical",
+        "label": "Physical trigger",
+        "help": "A preceding physical stressor, such as acute illness or surgery.",
+        "options": [
+          {
+            "value": 0,
+            "label": "No · 0 points"
+          },
+          {
+            "value": 1,
+            "label": "Yes · 13 points"
+          }
+        ]
+      },
+      {
+        "id": "no_st_depression",
+        "label": "ST-segment depression (except lead aVR)",
+        "help": "Select Absent to award 12 points. Depression confined to aVR does not negate this criterion.",
+        "options": [
+          {
+            "value": 0,
+            "label": "Present · 0 points"
+          },
+          {
+            "value": 1,
+            "label": "Absent · 12 points"
+          }
+        ]
+      },
+      {
+        "id": "psychiatric",
+        "label": "Psychiatric disorder",
+        "help": "Documented psychiatric disorder.",
+        "options": [
+          {
+            "value": 0,
+            "label": "No · 0 points"
+          },
+          {
+            "value": 1,
+            "label": "Yes · 11 points"
+          }
+        ]
+      },
+      {
+        "id": "neurologic",
+        "label": "Neurologic disorder",
+        "help": "Documented neurologic disorder.",
+        "options": [
+          {
+            "value": 0,
+            "label": "No · 0 points"
+          },
+          {
+            "value": 1,
+            "label": "Yes · 9 points"
+          }
+        ]
+      },
+      {
+        "id": "qtc",
+        "label": "QTc prolongation",
+        "help": "Use the clinically interpreted, heart-rate-corrected QT interval.",
+        "options": [
+          {
+            "value": 0,
+            "label": "No · 0 points"
+          },
+          {
+            "value": 1,
+            "label": "Yes · 6 points"
+          }
+        ]
+      }
+    ],
+    "note": "For suspected Takotsubo syndrome (TTS), particularly presentations without ST elevation. This is a diagnostic aid, not a prognostic score or a rule-out test for acute coronary syndrome (ACS). ST elevation requires urgent ACS assessment regardless of score.",
+    "method": "Add the seven contributions: female sex 25, emotional trigger 24, physical trigger 13, no ST depression outside aVR 12, psychiatric disorder 11, neurologic disorder 9, and QTc prolongation 6. Maximum 100. Figure 1 of the 2018 consensus uses ≤70 for low/intermediate and >70 for high TTS probability. Published probability examples are <1% at 30 points, about 18% at 50, and about 90% above 70; these depend on disease prevalence and are not a universal patient-specific probability curve.",
+    "references": [
+      {
+        "label": "Ghadri et al. Original InterTAK score, European Journal of Heart Failure (2017)",
+        "url": "https://doi.org/10.1002/ejhf.683"
+      },
+      {
+        "label": "International Expert Consensus on Takotsubo Syndrome, Part II (2018), Figures 1–2",
+        "url": "https://doi.org/10.1093/eurheartj/ehy077"
+      }
+    ]
   }
 ]

@@ -1,4 +1,4 @@
-import {calculate, validate} from './engine.mjs';
+import {calculate, validate} from './engine.mjs?v=20261110';
 
 const normalize = text => text.normalize('NFKD').toLowerCase().replace(/[^a-z0-9]+/g,' ');
 const search = document.querySelector('#calculator-search');

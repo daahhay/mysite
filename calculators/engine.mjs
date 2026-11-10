@@ -25,6 +25,18 @@ const row = (label, points) => ({label, points});
 export function calculate(slug, v) {
   let rows, score;
   switch (slug) {
+    case 'intertak': {
+      rows = [row('Female sex',25*v.female),row('Emotional trigger',24*v.emotional),
+        row('Physical trigger',13*v.physical),row('No ST depression except aVR',12*v.no_st_depression),
+        row('Psychiatric disorder',11*v.psychiatric),row('Neurologic disorder',9*v.neurologic),
+        row('QTc prolongation',6*v.qtc)];
+      score = rows.reduce((sum,r)=>sum+r.points,0);
+      // 2018 consensus, Figure 1: ≤70 versus >70 (not ≥70).
+      return total(rows,score>70?'High probability of TTS':'Low/intermediate probability of TTS',
+        'Takotsubo syndrome remains a clinical and imaging diagnosis. This score does not exclude ACS. '+(score>70?
+        'The consensus describes approximately 90% probability above 70 in its prevalence context; this is not a universal individual estimate.':
+        'Further diagnostic assessment is required; a low score does not exclude TTS.'),100);
+    }
     case 'coapt': {
       rows = [row('COPD',v.copd),row('AF / flutter',v.af),row('NYHA III / IVa',+(v.nyha >= 2)),
         row('Kidney function',v.egfr),row('LVEF',v.lvef),row('LVESD ≥5.5 cm',v.lvesd),
