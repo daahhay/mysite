@@ -1,0 +1,55 @@
+{
+  "title": "Propofol",
+  "slug": "propofol",
+  "published": false,
+  "language": "en",
+  "aliases": [
+    "Diprivan"
+  ],
+  "categories": [
+    "Anesthetics / Sedatives"
+  ],
+  "reviewed": "2026-11-12",
+  "overview": "<p></p>",
+  "dosing_guidance": "<p></p>",
+  "doses": [
+    {
+      "condition": " Sedation",
+      "population": "Adult",
+      "off_label": false,
+      "body": "<p>Initial: 5 mcg/kg/minute; increase by 5 to 10 mcg/kg/minute every 5 to 10 minutes until goal sedation level is achieved. Usual maintenance dose: 5 to 50 mcg/kg/minute. Maximum dose (not well defined; may vary by institution): 60 to 80 mcg/kg/minute. Daily awakening trials or use of nurse-protocolized sedation are recommended; generally, titrate down slowly to avoid rapid awakening. If agitated after discontinuation of continuous infusion, then restart at ~50% of the previous maintenance dose</p><p><strong><em>Monitored anesthesia care:</em> Note:</strong> Individualize dosing based on patient factors and concomitant anesthetic agents.</p><p><em>Healthy adults, ASA-PS 1 or 2:</em></p><p><strong>Continuous IV infusion:</strong> Initial: 25 to 75 <strong>mcg</strong>/kg/minute; titrate to adequate sedation. <strong>Note: </strong>If rapid effect is desired, may initiate with a higher infusion rate (eg, 100 to 150 <strong>mcg</strong>/kg/minute for 3 to 5 minutes) or administer an initial bolus (eg, 0.25 to 0.5 <strong>mg</strong>/kg) (<a class=\"ref-callout-list-link\" href=\"https://utd.utdru.ru/contents/topics/9826#\">Ref</a>).</p><p><strong><em>or</em></strong></p><p><strong>IV:</strong> Intermittent bolus: 10 to 20 mg; may give additional doses as needed to achieve adequate sedation (<a class=\"ref-callout-list-link\" href=\"https://utd.utdru.ru/contents/topics/9826#\">Ref</a>).</p><p><em>Debilitated or ASA-PS 3 or 4:</em> Use reduced dose. Bolus slowly and avoid rapid repeat dosing.</p><p><strong><em>Procedural sedation, outside the operating room (off-label use):</em> Note:</strong> Monitor respiratory and cardiovascular systems; refer to local/state regulations and institutional policies and procedures regarding administration and monitoring requirements.</p><p><strong>IV:</strong> Initial: 0.5 to 1 mg/kg, followed by 0.25 to 0.5 mg/kg every 1 to 3 minutes, as needed, to achieve adequate sedation</p>"
+    }
+  ],
+  "renal": "<p></p>",
+  "hepatic": "<p></p>",
+  "special_populations": "<p></p>",
+  "administration": "<p></p>",
+  "contraindications": "<p></p>",
+  "warnings": "<p></p>",
+  "adverse_effects": "<p></p>",
+  "interactions": "<p></p>",
+  "pregnancy": "<p></p>",
+  "monitoring": "<p></p>",
+  "mechanism": "<p></p>",
+  "pharmacokinetics": "<p></p>",
+  "counseling": "<p></p>",
+  "translation": {
+    "published": false,
+    "reviewed": "2026-11-12",
+    "overview": "<p></p>",
+    "dosing_guidance": "<p></p>",
+    "renal": "<p></p>",
+    "hepatic": "<p></p>",
+    "special_populations": "<p></p>",
+    "administration": "<p></p>",
+    "contraindications": "<p></p>",
+    "warnings": "<p></p>",
+    "adverse_effects": "<p></p>",
+    "interactions": "<p></p>",
+    "pregnancy": "<p></p>",
+    "monitoring": "<p></p>",
+    "mechanism": "<p></p>",
+    "pharmacokinetics": "<p></p>",
+    "counseling": "<p></p>"
+  }
+}
