@@ -289,7 +289,7 @@ content:
     subfolders: false
     view:
       primary: title
-      fields: [title, published, categories, reviewed]
+      fields: [title, language, published, categories, reviewed]
       sort: title
       order: asc
     fields:
@@ -307,6 +307,16 @@ content:
         type: boolean
         default: false
         description: "Drafts are hidden from the website. This GitHub repository is public, so do not enter confidential information."
+      - name: language
+        label: Original language
+        type: select
+        default: en
+        options:
+          values:
+            - value: en
+              label: English
+            - value: ru
+              label: Русский
       - name: aliases
         label: Other names / brand names
         type: string
@@ -472,3 +482,180 @@ content:
           - name: url
             label: Source link
             type: string
+      - name: translation
+        label: Translation (other language)
+        type: object
+        description: "Keep both languages in this one entry. English originals get Russian; Russian originals get English. Categories are shared. Translate the dosing and information fields below; they are not copied automatically."
+        fields:
+          - name: published
+            label: Publish translated version
+            type: boolean
+            default: false
+            description: "Turn on after reviewing the translation. The original drug must also be published."
+          - name: slug
+            label: Translated page address (optional)
+            type: string
+            description: "Leave blank for an automatic address ending in -ru or -en. Preserve an existing translated address."
+          - name: title
+            label: Drug name
+            type: string
+          - name: aliases
+            label: Other names / brand names
+            type: string
+            list: true
+          - name: reviewed
+            label: Last clinically reviewed
+            type: date
+            options:
+              format: yyyy-MM-dd
+          - name: summary
+            label: Brief description
+            type: text
+          - name: overview
+            label: Overview / pharmacologic category
+            type: rich-text
+            options:
+              format: html
+          - name: dosing_guidance
+            label: General dosing guidance
+            type: rich-text
+            options:
+              format: html
+            description: "Include formulation, dose-expression and unit conventions where needed."
+          - name: doses
+            label: Dosing by condition
+            type: object
+            list:
+              collapsible:
+                collapsed: true
+                summary: "{fields.condition}"
+            description: "Add one entry for each indication or population. Reorder entries by dragging."
+            fields:
+              - name: condition
+                label: Condition / indication
+                type: string
+                required: true
+              - name: population
+                label: Patient group
+                type: string
+                description: "For example Adult, Pediatric, Older adult."
+              - name: route
+                label: Route / formulation
+                type: string
+              - name: off_label
+                label: Off-label use
+                type: boolean
+                default: false
+              - name: body
+                label: Doses, titration, maximum dose and notes
+                type: rich-text
+                options:
+                  format: html
+                description: "Use paragraphs, headings, lists or tables. State units explicitly and add source links."
+          - name: renal
+            label: Kidney impairment
+            type: rich-text
+            options:
+              format: html
+          - name: hepatic
+            label: Liver impairment
+            type: rich-text
+            options:
+              format: html
+          - name: special_populations
+            label: Obesity / older adults / other populations
+            type: rich-text
+            options:
+              format: html
+          - name: administration
+            label: Administration / preparation / storage
+            type: rich-text
+            options:
+              format: html
+          - name: contraindications
+            label: Contraindications
+            type: rich-text
+            options:
+              format: html
+          - name: warnings
+            label: Warnings / precautions
+            type: rich-text
+            options:
+              format: html
+          - name: adverse_effects
+            label: Adverse effects
+            type: rich-text
+            options:
+              format: html
+          - name: interactions
+            label: Drug interactions
+            type: rich-text
+            options:
+              format: html
+          - name: pregnancy
+            label: Pregnancy / breastfeeding
+            type: rich-text
+            options:
+              format: html
+          - name: monitoring
+            label: Monitoring
+            type: rich-text
+            options:
+              format: html
+          - name: mechanism
+            label: Mechanism of action
+            type: rich-text
+            options:
+              format: html
+          - name: pharmacokinetics
+            label: Pharmacokinetics
+            type: rich-text
+            options:
+              format: html
+          - name: counseling
+            label: Patient counseling
+            type: rich-text
+            options:
+              format: html
+
+          - name: sections
+            label: Additional sections
+            type: object
+            list:
+              collapsible:
+                collapsed: true
+                summary: "{fields.title}"
+            fields:
+              - name: title
+                label: Heading
+                type: string
+                required: true
+              - name: body
+                label: Text, tables and pictures
+                type: rich-text
+                options:
+                  format: html
+          - name: attachments
+            label: Downloadable documents
+            type: object
+            list: true
+            fields:
+              - name: title
+                label: Download label
+                type: string
+              - name: file
+                label: PDF or PowerPoint
+                type: file
+                options:
+                  extensions: [pdf, pptx]
+          - name: references
+            label: References
+            type: object
+            list: true
+            fields:
+              - name: title
+                label: Source title
+                type: string
+              - name: url
+                label: Source link
+                type: string

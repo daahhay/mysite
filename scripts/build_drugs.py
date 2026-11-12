@@ -34,17 +34,63 @@ def load_drugs(root, preview=False):
         entries.append(d)
     return sorted(entries, key=lambda d:d['title'].casefold())
 
+
+RU = {
+    'Overview':'Обзор', 'Dosing guidance':'Общие рекомендации по дозированию',
+    'Dosing by condition':'Дозирование по показаниям', 'Off-label use':'Применение вне зарегистрированных показаний',
+    'Kidney impairment':'Нарушение функции почек', 'Liver impairment':'Нарушение функции печени',
+    'Obesity / older adults / other populations':'Ожирение / пожилой возраст / особые группы',
+    'Administration / preparation / storage':'Введение / приготовление / хранение',
+    'Contraindications':'Противопоказания', 'Warnings / precautions':'Предупреждения и меры предосторожности',
+    'Adverse effects':'Нежелательные реакции', 'Drug interactions':'Лекарственные взаимодействия',
+    'Pregnancy / breastfeeding':'Беременность и грудное вскармливание', 'Monitoring':'Мониторинг',
+    'Mechanism of action':'Механизм действия', 'Pharmacokinetics':'Фармакокинетика',
+    'Patient counseling':'Информация для пациента', 'Downloads':'Материалы для скачивания',
+    'References':'Источники', 'All drugs':'Все препараты', 'CONTENTS':'СОДЕРЖАНИЕ',
+    'Last reviewed: ':'Дата проверки: ', 'Drug information':'Информация о препарате',
+    'Draft preview · not published':'Черновик · не опубликован'
+}
+
+def drug_versions(drug, preview=False):
+    original = dict(drug)
+    original['language'] = drug.get('language') or 'en'
+    if original['language'] not in ('en','ru'):
+        raise ValueError('Invalid drug language: ' + original['language'])
+    versions = [original]
+    translation = drug.get('translation') or {}
+    if translation and (translation.get('published') is True or preview) and str(translation.get('title') or '').strip():
+        other = 'ru' if original['language']=='en' else 'en'
+        # Keep clinical text separate: never fill missing translations with original doses.
+        translated = {k:v for k,v in translation.items() if k not in ('language','categories','slug','published')}
+        translated.update(language=other, categories=original['categories'],
+                          slug=translation.get('slug') or original['slug']+'-'+other,
+                          published=original.get('published') is True and translation.get('published') is True)
+        versions.append(translated)
+    elif translation.get('published') is True and not str(translation.get('title') or '').strip():
+        raise ValueError('Published translation needs a drug name: ' + original['slug'])
+    for version in versions:
+        version['group'] = original['slug']
+        version['versions'] = [{'title':v['title'],'slug':v['slug'],'language':v['language']} for v in versions]
+    return versions
+
 def build_drugs(root, output, frame, parser_type, safe_url, preview=False):
     target = output / 'drugs'
     target.mkdir()
     for name in ('drugs.css', 'drugs.js'):
         shutil.copy2(root / 'drugs' / name, target / name)
-    def page(title, path, body, description='Drug information library.'):
-        result = frame(title, description, path, body)
+    def page(title, path, body, description='Drug information library.', lang='en'):
+        result = frame(title, description, path, body, lang=lang)
         result = result.replace('</head>', '<link rel="stylesheet" href="/drugs/drugs.css"></head>')
         result = result.replace('<a href="/blog/edit/">Manage blog ↗</a>', '<a href="/drugs/edit/">Manage drugs</a>')
         return result.replace('</body>', '<script src="/drugs/drugs.js" defer></script></body>')
     entries = load_drugs(root, preview)
+    versions = [v for d in entries for v in drug_versions(d, preview)]
+    seen_slugs = set()
+    for v in versions:
+        slug = v['slug']
+        if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', slug) or slug=='edit' or slug in seen_slugs:
+            raise ValueError('Invalid or duplicate drug version address: ' + slug)
+        seen_slugs.add(slug)
     category_paths = set()
     for d in entries:
         for category in d['categories']:
@@ -53,31 +99,34 @@ def build_drugs(root, output, frame, parser_type, safe_url, preview=False):
     folder_links = ''.join('<li><a class="drug-folder" href="?category='+quote(c)+'" data-folder="'+esc(c)+'" style="--depth:'+str(c.count(' / '))+'">'+esc(c.split(' / ')[-1])+'</a></li>' for c in sorted(category_paths,key=str.casefold))
     rows = []
     letters = set()
-    for d in entries:
+    for d in versions:
         letter = d['title'][0].upper()
         letter = letter if letter.isalpha() else '#'
         letters.add(letter)
         search = ' '.join([d['title'], ' '.join((d.get('aliases') or [])), ' '.join(d['categories']), d.get('summary','')])
-        rows.append('<li class="drug-row" data-letter="'+esc(letter)+'" data-search="'+esc(search)+'" data-categories="'+esc(json.dumps(d['categories']))+'"><a href="/drugs/'+d['slug']+'/">'+esc(d['title'])+'<span class="drug-type">: Drug information</span></a><p>'+esc(' · '.join(d['categories']))+'</p></li>')
+        alternate = d['slug'] != d['group']
+        switch = ' '.join('<a lang="'+v['language']+'" href="/drugs/'+v['slug']+'/">'+('Русский' if v['language']=='ru' else 'English')+'</a>' for v in d['versions']) if len(d['versions'])>1 else ''
+        rows.append('<li class="drug-row"'+(' hidden' if alternate else '')+' data-group="'+esc(d['group'])+'" data-language="'+d['language']+'" data-letter="'+esc(letter)+'" data-search="'+esc(search)+'" data-categories="'+esc(json.dumps(d['categories']))+'"><a href="/drugs/'+d['slug']+'/">'+esc(d['title'])+'<span class="drug-type">: '+('Информация о препарате' if d['language']=='ru' else 'Drug information')+'</span></a><p>'+esc(' · '.join(d['categories']))+'</p><div class="drug-version-links">'+switch+'</div></li>')
     alphabet = ''.join('<button type="button" data-letter-filter="'+esc(l)+'">'+esc(l)+'</button>' for l in sorted(letters))
     body = '''<section class="drug-hero"><h1>Drugs</h1><p>Browse drug information by name or category.</p></section>
 <div class="drug-library"><aside class="drug-folders" aria-label="Drug categories"><h2>Categories</h2><ul><li><a class="drug-folder" href="/drugs/" data-folder="">All drugs</a></li>'''+folder_links+'''</ul></aside>
 <section aria-label="Drug list"><label class="drug-search">Find a drug<input id="drug-search" type="search" placeholder="Drug name, brand or category…" autocomplete="off"></label>
-<div class="drug-alphabet" aria-label="Filter by initial"><button type="button" data-letter-filter="">All</button>'''+alphabet+'''</div>
+<label class="drug-language-filter">Language<select id="drug-language"><option value="">All languages</option><option value="en">English</option><option value="ru">Русский</option></select></label>\n<div class="drug-alphabet" aria-label="Filter by initial"><button type="button" data-letter-filter="">All</button>'''+alphabet+'''</div>
 <div class="drug-list-status"><p id="drug-count" role="status">'''+str(len(entries))+''' drugs</p><button id="drug-clear" type="button">Clear filters</button></div><ul class="drug-list">'''+''.join(rows)+'''</ul>
 <p id="drug-empty"'''+(' hidden' if entries else '')+'''>'''+('No matching drugs. Try another search or category.' if entries else 'No drug pages have been published yet.')+'''</p></section></div>'''
     (target/'index.html').write_text(page('Drugs','/drugs/',body))
-    for d in entries:
+    for d in versions:
+        tr = lambda label: RU.get(label,label) if d['language']=='ru' else label
         raw = ''
         def section(title, value):
-            return '<h2>'+esc(title)+'</h2>'+str(value) if value and str(value).strip() not in ('<p></p>','<p><br></p>') else ''
+            return '<h2>'+esc(tr(title))+'</h2>'+str(value) if value and str(value).strip() not in ('<p></p>','<p><br></p>') else ''
         raw += section('Overview', d.get('overview'))
         raw += section('Dosing guidance', d.get('dosing_guidance'))
         if d.get('doses'):
-            raw += '<h2>Dosing by condition</h2>'
+            raw += '<h2>'+esc(tr('Dosing by condition'))+'</h2>'
             for dose in d['doses']:
                 raw += '<h3>'+esc(dose.get('condition'))+'</h3>'
-                metadata = [dose.get('population'),dose.get('route'), 'Off-label use' if dose.get('off_label') else '']
+                metadata = [dose.get('population'),dose.get('route'), tr('Off-label use') if dose.get('off_label') else '']
                 raw += '<p><strong>'+esc(' · '.join(x for x in metadata if x))+'</strong></p>'+str(dose.get('body') or '')
         for key, title in SECTIONS:
             raw += section(title, d.get(key))
@@ -102,18 +151,21 @@ def build_drugs(root, output, frame, parser_type, safe_url, preview=False):
         content = parser.finish()
         toc = ''.join('<li class="toc-level-'+str(level)+'"><a href="#'+anchor+'">'+esc(title)+'</a></li>' for anchor,title,level in parser.toc)
         category_links = ' '.join('<a class="drug-category" href="/drugs/?category='+quote(c)+'">'+esc(c)+'</a>' for c in d['categories'])
-        body = '<a class="back-link" href="/drugs/">All drugs</a><div class="drug-heading">'
+        body = '<a class="back-link" href="/drugs/">'+tr('All drugs')+'</a>'
+        if len(d['versions'])>1:
+            body += '<nav class="drug-language-switch" aria-label="Drug language">' + ''.join('<a lang="'+v['language']+'" hreflang="'+v['language']+'" href="/drugs/'+v['slug']+'/"'+(' aria-current="page"' if v['slug']==d['slug'] else '')+'>'+('Русский' if v['language']=='ru' else 'English')+'</a>' for v in d['versions'])+'</nav>'
+        body += '<div class="drug-heading">'
         if not d.get('published'):
-            body += '<p class="drug-draft">Draft preview · not published</p>'
+            body += '<p class="drug-draft">'+tr('Draft preview · not published')+'</p>'
         body += '<h1>'+esc(d['title'])+'</h1><p>'+esc(' · '.join((d.get('aliases') or [])))+'</p><div>'+category_links+'</div>'
         if d.get('summary'):
             body += '<p>'+esc(d['summary'])+'</p>'
         if d.get('reviewed'):
-            body += '<p class="muted">Last reviewed: '+esc(d['reviewed'])+'</p>'
-        body += '</div><div class="reading-layout"><aside class="article-toc" aria-label="Drug contents"><h2>CONTENTS</h2><ol>'+toc+'</ol></aside><article class="article-body drug-body">'+content+'</article></div>'
+            body += '<p class="muted">'+tr('Last reviewed: ')+esc(d['reviewed'])+'</p>'
+        body += '</div><div class="reading-layout"><aside class="article-toc" aria-label="Drug contents"><h2>'+tr('CONTENTS')+'</h2><ol>'+toc+'</ol></aside><article class="article-body drug-body">'+content+'</article></div>'
         folder = target/d['slug']; folder.mkdir()
-        (folder/'index.html').write_text(page(d['title']+' | Drug information','/drugs/'+d['slug']+'/',body,d.get('summary') or d['title']+' drug information.'))
+        (folder/'index.html').write_text(page(d['title']+' | '+tr('Drug information'),'/drugs/'+d['slug']+'/',body,d.get('summary') or d['title'],lang=d['language']))
     editor = target/'edit'; editor.mkdir()
     guide = '''<section class="drug-hero"><h1>Manage drugs</h1><p>Add and update drug information with the visual editor.</p><a class="button" href="https://app.pagescms.org/daahhay/mysite/main">Open Pages CMS</a></section>
-<article class="article-body"><h2>Create a drug page</h2><ol><li>Open Pages CMS and choose <strong>Drugs</strong>, then create an entry.</li><li>Enter the drug name and a permanent page address, such as <strong>norepinephrine</strong>.</li><li>Add other names and categories. Type a new category directly; use <strong>Cardiovascular / Vasopressors</strong> to create a nested folder. You can assign multiple folders.</li><li>Under <strong>Dosing by condition</strong>, add an entry for each condition or population. Enter the route and format doses, titration and notes with the rich-text toolbar.</li><li>Fill the relevant information sections. Empty sections are omitted. Add more sections, pictures, tables, source links or downloadable documents as needed.</li><li>Review the content, set the review date, turn on <strong>Publish on website</strong>, and save. The website rebuilds automatically.</li></ol><h2>Drafts and folders</h2><p>Drafts are hidden from the live library. Source files remain visible in the public GitHub repository. Categories appear automatically when their drugs are published. Moving a drug between categories does not change its page address.</p><h2>Starter entry</h2><p>An unpublished Norepinephrine entry provides example condition headings. Enter and review your content before publishing. No doses have been filled in automatically.</p></article>'''
+<article class="article-body"><h2>Create a drug page</h2><ol><li>Open Pages CMS and choose <strong>Drugs</strong>, then create an entry.</li><li>Enter the drug name and a permanent page address, such as <strong>norepinephrine</strong>.</li><li>Add other names and categories. Type a new category directly; use <strong>Cardiovascular / Vasopressors</strong> to create a nested folder. You can assign multiple folders.</li><li>Under <strong>Dosing by condition</strong>, add an entry for each condition or population. Enter the route and format doses, titration and notes with the rich-text toolbar.</li><li>Fill the relevant information sections. Empty sections are omitted. Add more sections, pictures, tables, source links or downloadable documents as needed.</li><li>Review the content, set the review date, turn on <strong>Publish on website</strong>, and save. The website rebuilds automatically.</li></ol><h2>Two languages, one drug</h2><p>Choose the original language at the top of the form. Open <strong>Translation (other language)</strong> in the same entry, add the translated name, dosing entries and other sections, then enable <strong>Publish translated version</strong>. The original must also be published. Categories are shared; clinical content must be entered separately. The library shows one entry, and readers switch English / Русский on the drug page. Leave the translated address blank for an automatic -ru or -en address.</p><h2>Drafts and folders</h2><p>Drafts are hidden from the live library. Source files remain visible in the public GitHub repository. Categories appear automatically when their drugs are published. Moving a drug between categories does not change its page address.</p><h2>Starter entry</h2><p>An unpublished Norepinephrine entry provides example condition headings. Enter and review your content before publishing. No doses have been filled in automatically.</p></article>'''
     (editor/'index.html').write_text(page('Manage drugs','/drugs/edit/',guide))
