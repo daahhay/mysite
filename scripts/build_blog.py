@@ -190,7 +190,7 @@ def video_block(url, caption=''):
 def frame(title, description, path, content, lang='en', noindex=False):
     section_link = ''.join(
         f'<a href="{ORIGIN}{url}"' + (' aria-current="location"' if path.startswith(url) else '') + f'>{label}</a>'
-        for url, label in (('/blog/', 'Blog'), ('/calculators/', 'Calculators'))
+        for url, label in (('/blog/', 'Blog'), ('/calculators/', 'Calculators'), ('/drugs/', 'Drugs'))
     )
     return f'''<!doctype html>
 <html lang="{esc(lang)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -550,6 +550,10 @@ def build(root, output, include_drafts=False):
         import runpy
         calculator_builder = runpy.run_path(str(root / 'scripts/build_calculators.py'))
         calculator_builder['build_calculators'](root, output, frame)
+    if (root / 'scripts/build_drugs.py').exists():
+        import runpy
+        drug_builder = runpy.run_path(str(root / 'scripts/build_drugs.py'))
+        drug_builder['build_drugs'](root, output, frame, ArticleHTML, safe_url, include_drafts)
     # Change stylesheet URLs whenever their contents change, avoiding stale headers.
     css_versions = { '/' + p.relative_to(output).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()[:12]
                      for p in list(output.rglob('*.css')) + list(output.rglob('*.js')) }

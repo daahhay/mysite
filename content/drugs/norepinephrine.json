@@ -1,0 +1,59 @@
+{
+  "title": "Norepinephrine (noradrenaline)",
+  "slug": "norepinephrine",
+  "published": false,
+  "aliases": [
+    "Noradrenaline"
+  ],
+  "categories": [
+    "Cardiovascular / Vasopressors"
+  ],
+  "summary": "",
+  "overview": "",
+  "dosing_guidance": "",
+  "doses": [
+    {
+      "condition": "Hepatorenal syndrome",
+      "population": "Adult",
+      "route": "",
+      "off_label": false,
+      "body": ""
+    },
+    {
+      "condition": "Hypotension or shock",
+      "population": "Adult",
+      "route": "",
+      "off_label": false,
+      "body": ""
+    },
+    {
+      "condition": "Cardiogenic shock",
+      "population": "Adult",
+      "route": "",
+      "off_label": false,
+      "body": ""
+    },
+    {
+      "condition": "Post-cardiac arrest shock",
+      "population": "Adult",
+      "route": "",
+      "off_label": false,
+      "body": ""
+    },
+    {
+      "condition": "Septic shock",
+      "population": "Adult",
+      "route": "",
+      "off_label": false,
+      "body": ""
+    },
+    {
+      "condition": "Hypotension / shock in children",
+      "population": "Pediatric",
+      "route": "",
+      "off_label": false,
+      "body": ""
+    }
+  ],
+  "references": []
+}
