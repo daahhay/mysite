@@ -46,7 +46,7 @@ class DrugLibraryTests(unittest.TestCase):
             import re
             ids=re.findall(r'id="(section-[0-9]+)"',page)
             self.assertEqual(len(ids),len(set(ids)))
-            for anchor in ids:self.assertIn('href="#'+anchor+'"',page)
+            for anchor in re.findall(r'<h2 id="(section-[0-9]+)"',page):self.assertIn('href="#'+anchor+'"',page)
 
     def test_invalid_slug(self):
         with tempfile.TemporaryDirectory() as directory:

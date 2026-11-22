@@ -41,3 +41,57 @@ if (search) {
   addEventListener('popstate',()=>{const p=new URLSearchParams(location.search);category=p.get('category')||'';letter=p.get('letter')||'';search.value=p.get('q')||'';language.value=p.get('language')||'';filter(false);});
   filter(false);
 }
+
+// Enhance existing section headings into accessible tabs; without JavaScript all text remains available.
+const drugBody = document.querySelector('.drug-body');
+const drugTabs = document.querySelector('.drug-tabs');
+if (drugBody && drugTabs) {
+  const links = [...drugTabs.querySelectorAll('a')];
+  const panels = [];
+  let panel;
+  for (const node of [...drugBody.childNodes]) {
+    if (node.nodeType === 1 && node.tagName === 'H2') {
+      panel = document.createElement('section');
+      panel.className = 'drug-panel';
+      panel.id = 'panel-' + node.id;
+      drugBody.insertBefore(panel,node);
+      panels.push(panel);
+    }
+    if (panel) panel.appendChild(node);
+  }
+  if (links.length && panels.length === links.length) {
+    drugTabs.setAttribute('role','tablist');
+    links.forEach((link,i) => {
+      link.id = 'drug-tab-' + i;
+      link.setAttribute('role','tab');
+      link.setAttribute('aria-controls',panels[i].id);
+      panels[i].setAttribute('role','tabpanel');
+      panels[i].setAttribute('aria-labelledby',link.id);
+      panels[i].tabIndex = 0;
+      link.addEventListener('click',e => {
+        e.preventDefault(); activate(i);
+        history.replaceState(null,'',link.getAttribute('href'));
+      });
+      link.addEventListener('keydown',e => {
+        let next;
+        if(e.key==='ArrowRight') next=(i+1)%links.length;
+        if(e.key==='ArrowLeft') next=(i+links.length-1)%links.length;
+        if(e.key==='Home') next=0;
+        if(e.key==='End') next=links.length-1;
+        if(next!==undefined){e.preventDefault();links[next].click();links[next].focus();}
+      });
+    });
+    function activate(index) {
+      panels.forEach((p,i)=>p.hidden=i!==index);
+      links.forEach((link,i)=>{link.setAttribute('aria-selected',String(i===index));link.tabIndex=i===index?0:-1;});
+    }
+    function fromHash() {
+      let target;
+      try { target=document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch {}
+      const index=panels.findIndex(p=>p===target || p.contains(target));
+      activate(index<0?0:index);
+    }
+    addEventListener('hashchange',fromHash);
+    fromHash();
+  }
+}

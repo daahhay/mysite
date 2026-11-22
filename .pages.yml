@@ -331,6 +331,24 @@ content:
         type: date
         options:
           format: yyyy-MM-dd
+      - name: formulation
+        label: Formulation / concentration badge
+        type: string
+      - name: tags
+        label: Short labels (route, population, use)
+        type: string
+        list: true
+      - name: quick_facts
+        label: Quick facts
+        type: object
+        list: true
+        fields:
+          - name: label
+            label: Heading
+            type: string
+          - name: value
+            label: Value
+            type: string
       - name: summary
         label: Brief description
         type: text
@@ -508,6 +526,24 @@ content:
             type: date
             options:
               format: yyyy-MM-dd
+          - name: formulation
+            label: Formulation / concentration badge
+            type: string
+          - name: tags
+            label: Short labels (route, population, use)
+            type: string
+            list: true
+          - name: quick_facts
+            label: Quick facts
+            type: object
+            list: true
+            fields:
+              - name: label
+                label: Heading
+                type: string
+              - name: value
+                label: Value
+                type: string
           - name: summary
             label: Brief description
             type: text

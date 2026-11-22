@@ -79,7 +79,7 @@ def build_drugs(root, output, frame, parser_type, safe_url, preview=False):
     for name in ('drugs.css', 'drugs.js'):
         shutil.copy2(root / 'drugs' / name, target / name)
     def page(title, path, body, description='Drug information library.', lang='en'):
-        result = frame(title, description, path, body, lang=lang)
+        result = frame(title, description, path, '<div class="drug-site">'+body+'</div>', lang=lang)
         result = result.replace('</head>', '<link rel="stylesheet" href="/drugs/drugs.css"></head>')
         result = result.replace('<a href="/blog/edit/">Manage blog ↗</a>', '<a href="/drugs/edit/">Manage drugs</a>')
         return result.replace('</body>', '<script src="/drugs/drugs.js" defer></script></body>')
@@ -96,7 +96,7 @@ def build_drugs(root, output, frame, parser_type, safe_url, preview=False):
         for category in d['categories']:
             parts = category.split(' / ')
             category_paths.update(' / '.join(parts[:i]) for i in range(1,len(parts)+1))
-    folder_links = ''.join('<li><a class="drug-folder" href="?category='+quote(c)+'" data-folder="'+esc(c)+'" style="--depth:'+str(c.count(' / '))+'">'+esc(c.split(' / ')[-1])+'</a></li>' for c in sorted(category_paths,key=str.casefold))
+    folder_links = ''.join('<li><a class="drug-folder" href="?category='+quote(c)+'" data-folder="'+esc(c)+'" style="--depth:'+str(c.count(' / '))+'">'+esc(c)+'</a></li>' for c in sorted(category_paths,key=str.casefold))
     rows = []
     letters = set()
     for d in versions:
@@ -106,12 +106,13 @@ def build_drugs(root, output, frame, parser_type, safe_url, preview=False):
         search = ' '.join([d['title'], ' '.join((d.get('aliases') or [])), ' '.join(d['categories']), d.get('summary','')])
         alternate = d['slug'] != d['group']
         switch = ' '.join('<a lang="'+v['language']+'" href="/drugs/'+v['slug']+'/">'+('Русский' if v['language']=='ru' else 'English')+'</a>' for v in d['versions']) if len(d['versions'])>1 else ''
-        rows.append('<li class="drug-row"'+(' hidden' if alternate else '')+' data-group="'+esc(d['group'])+'" data-language="'+d['language']+'" data-letter="'+esc(letter)+'" data-search="'+esc(search)+'" data-categories="'+esc(json.dumps(d['categories']))+'"><a href="/drugs/'+d['slug']+'/">'+esc(d['title'])+'<span class="drug-type">: '+('Информация о препарате' if d['language']=='ru' else 'Drug information')+'</span></a><p>'+esc(' · '.join(d['categories']))+'</p><div class="drug-version-links">'+switch+'</div></li>')
+        tags = ''.join('<span>'+esc(t)+'</span>' for t in (d.get('tags') or []))
+        category = d['categories'][0].split(' / ')[-1] if d['categories'] else ''
+        rows.append('<li class="drug-row"'+(' hidden' if alternate else '')+' data-group="'+esc(d['group'])+'" data-language="'+d['language']+'" data-letter="'+esc(letter)+'" data-search="'+esc(search+' '+' '.join(d.get('tags') or []))+'" data-categories="'+esc(json.dumps(d['categories']))+'"><div class="drug-card-top"><span class="drug-card-category">'+esc(category)+'</span><span class="drug-formulation">'+esc(d.get('formulation'))+'</span></div><h2><a href="/drugs/'+d['slug']+'/">'+esc(d['title'])+'</a></h2><p class="drug-aliases">'+esc(' · '.join(d.get('aliases') or []))+'</p><div class="drug-tags">'+tags+'</div><p class="drug-card-summary">'+esc(d.get('summary'))+'</p><a class="drug-card-open" href="/drugs/'+d['slug']+'/">'+('Открыть препарат' if d['language']=='ru' else 'View drug')+'</a><div class="drug-version-links">'+switch+'</div></li>')
     alphabet = ''.join('<button type="button" data-letter-filter="'+esc(l)+'">'+esc(l)+'</button>' for l in sorted(letters))
-    body = '''<section class="drug-hero"><h1>Drugs</h1><p>Browse drug information by name or category.</p></section>
-<div class="drug-library"><aside class="drug-folders" aria-label="Drug categories"><h2>Categories</h2><ul><li><a class="drug-folder" href="/drugs/" data-folder="">All drugs</a></li>'''+folder_links+'''</ul></aside>
-<section aria-label="Drug list"><label class="drug-search">Find a drug<input id="drug-search" type="search" placeholder="Drug name, brand or category…" autocomplete="off"></label>
-<label class="drug-language-filter">Language<select id="drug-language"><option value="">All languages</option><option value="en">English</option><option value="ru">Русский</option></select></label>\n<div class="drug-alphabet" aria-label="Filter by initial"><button type="button" data-letter-filter="">All</button>'''+alphabet+'''</div>
+    body = '''<section class="drug-hero"><h1>Drugs</h1><p>Drug information, organised for quick reference.</p><label class="drug-search">Find a drug<input id="drug-search" type="search" placeholder="Drug name, brand or category…" autocomplete="off"></label></section>
+<div class="drug-library"><nav class="drug-folders" aria-label="Drug categories"><ul><li><a class="drug-folder" href="/drugs/" data-folder="">All drugs</a></li>'''+folder_links+'''</ul></nav>
+<section aria-label="Drug list"><div class="drug-filter-row"><div class="drug-alphabet" aria-label="Filter by initial"><button type="button" data-letter-filter="">All</button>'''+alphabet+'''</div><label class="drug-language-filter">Language<select id="drug-language"><option value="">All languages</option><option value="en">English</option><option value="ru">Русский</option></select></label></div>
 <div class="drug-list-status"><p id="drug-count" role="status">'''+str(len(entries))+''' drugs</p><button id="drug-clear" type="button">Clear filters</button></div><ul class="drug-list">'''+''.join(rows)+'''</ul>
 <p id="drug-empty"'''+(' hidden' if entries else '')+'''>'''+('No matching drugs. Try another search or category.' if entries else 'No drug pages have been published yet.')+'''</p></section></div>'''
     (target/'index.html').write_text(page('Drugs','/drugs/',body))
@@ -149,7 +150,6 @@ def build_drugs(root, output, frame, parser_type, safe_url, preview=False):
         parser = parser_type()
         parser.feed(raw)
         content = parser.finish()
-        toc = ''.join('<li class="toc-level-'+str(level)+'"><a href="#'+anchor+'">'+esc(title)+'</a></li>' for anchor,title,level in parser.toc)
         category_links = ' '.join('<a class="drug-category" href="/drugs/?category='+quote(c)+'">'+esc(c)+'</a>' for c in d['categories'])
         body = '<a class="back-link" href="/drugs/">'+tr('All drugs')+'</a>'
         if len(d['versions'])>1:
@@ -157,12 +157,15 @@ def build_drugs(root, output, frame, parser_type, safe_url, preview=False):
         body += '<div class="drug-heading">'
         if not d.get('published'):
             body += '<p class="drug-draft">'+tr('Draft preview · not published')+'</p>'
-        body += '<h1>'+esc(d['title'])+'</h1><p>'+esc(' · '.join((d.get('aliases') or [])))+'</p><div>'+category_links+'</div>'
+        body += '<div class="drug-tags">'+''.join('<span>'+esc(t)+'</span>' for t in ([d.get('formulation')] if d.get('formulation') else [])+(d.get('tags') or []))+'</div><h1>'+esc(d['title'])+'</h1><p>'+esc(' · '.join((d.get('aliases') or [])))+'</p><div>'+category_links+'</div>'
         if d.get('summary'):
             body += '<p>'+esc(d['summary'])+'</p>'
         if d.get('reviewed'):
             body += '<p class="muted">'+tr('Last reviewed: ')+esc(d['reviewed'])+'</p>'
-        body += '</div><div class="reading-layout"><aside class="article-toc" aria-label="Drug contents"><h2>'+tr('CONTENTS')+'</h2><ol>'+toc+'</ol></aside><article class="article-body drug-body">'+content+'</article></div>'
+        facts = ''.join('<div class="drug-fact"><dt>'+esc(f.get('label'))+'</dt><dd>'+esc(f.get('value'))+'</dd></div>' for f in (d.get('quick_facts') or []) if f.get('label') and f.get('value'))
+        body += '</div>'+('<dl class="drug-quick-facts">'+facts+'</dl>' if facts else '')
+        body += '<div class="drug-detail"><nav class="drug-tabs" aria-label="'+('Разделы препарата' if d['language']=='ru' else 'Drug sections')+'">'+''.join('<a href="#'+anchor+'">'+esc(title)+'</a>' for anchor,title,level in parser.toc if level==2)+'</nav><article class="article-body drug-body">'+content+'</article></div>'
+
         folder = target/d['slug']; folder.mkdir()
         (folder/'index.html').write_text(page(d['title']+' | '+tr('Drug information'),'/drugs/'+d['slug']+'/',body,d.get('summary') or d['title'],lang=d['language']))
     editor = target/'edit'; editor.mkdir()
