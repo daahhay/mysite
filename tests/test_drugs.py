@@ -18,7 +18,7 @@ class DrugLibraryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory); (root/'content/drugs').mkdir(parents=True)
             (root/'drugs').mkdir()
-            for name in ['drugs.css','drugs.js']:
+            for name in ['drugs.css','drugs.js','drug-dose.js']:
                 (root/'drugs'/name).write_text('')
             drug={'title':'Test drug','slug':'test-drug','published':True,
                   'categories':['Cardiology / Pressors'], 'aliases':['Test alias'],
@@ -38,6 +38,8 @@ class DrugLibraryTests(unittest.TestCase):
             self.assertNotIn('alert(1)',page)
             self.assertNotIn('javascript:',page)
             self.assertIn('Test table',page)
+            self.assertIn('id="dose-calculator"',page)
+            self.assertIn('/drugs/drug-dose.js',page)
             self.assertIn('Kidney impairment',page)
             self.assertNotIn('Liver impairment',page)
             self.assertIn('data-folder="Cardiology"',index)
@@ -59,7 +61,7 @@ class DrugLibraryTests(unittest.TestCase):
     def test_bilingual_pages_and_draft_translation(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory); (root/'content/drugs').mkdir(parents=True); (root/'drugs').mkdir()
-            for name in ['drugs.css','drugs.js']:(root/'drugs'/name).write_text('')
+            for name in ['drugs.css','drugs.js','drug-dose.js']:(root/'drugs'/name).write_text('')
             d={'title':'Test medicine','slug':'medicine','published':True,'language':'en',
                'categories':['Test / Folder'],'renal':'<p>English renal information</p>',
                'translation':{'published':True,'title':'Тестовый препарат',
@@ -95,7 +97,7 @@ class DrugLibraryTests(unittest.TestCase):
         with self.assertRaises(ValueError):drug_versions(d)
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);(root/'content/drugs').mkdir(parents=True);(root/'drugs').mkdir()
-            for name in ['drugs.css','drugs.js']:(root/'drugs'/name).write_text('')
+            for name in ['drugs.css','drugs.js','drug-dose.js']:(root/'drugs'/name).write_text('')
             d['translation']={'title':'Name','published':True,'slug':'test'}
             (root/'content/drugs/test.json').write_text(json.dumps(d))
             out=root/'out';out.mkdir()

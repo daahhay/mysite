@@ -76,13 +76,13 @@ def drug_versions(drug, preview=False):
 def build_drugs(root, output, frame, parser_type, safe_url, preview=False):
     target = output / 'drugs'
     target.mkdir()
-    for name in ('drugs.css', 'drugs.js'):
+    for name in ('drugs.css', 'drugs.js', 'drug-dose.js'):
         shutil.copy2(root / 'drugs' / name, target / name)
     def page(title, path, body, description='Drug information library.', lang='en'):
         result = frame(title, description, path, '<div class="drug-site">'+body+'</div>', lang=lang)
         result = result.replace('</head>', '<link rel="stylesheet" href="/drugs/drugs.css"></head>')
         result = result.replace('<a href="/blog/edit/">Manage blog ↗</a>', '<a href="/drugs/edit/">Manage drugs</a>')
-        return result.replace('</body>', '<script src="/drugs/drugs.js" defer></script></body>')
+        return result.replace('</body>', '<script src="/drugs/drug-dose.js" defer></script><script src="/drugs/drugs.js" defer></script></body>')
     entries = load_drugs(root, preview)
     versions = [v for d in entries for v in drug_versions(d, preview)]
     seen_slugs = set()
@@ -149,7 +149,9 @@ def build_drugs(root, output, frame, parser_type, safe_url, preview=False):
             raw += section('References','<ol>'+''.join(refs)+'</ol>')
         parser = parser_type()
         parser.feed(raw)
-        content = parser.finish()
+        calc_title = 'Быстрый расчёт дозы' if d['language']=='ru' else 'Quick dose calculation'
+        calc_data = esc(json.dumps(d.get('calculator_regimens') or [], ensure_ascii=False))
+        content = '<h2 id="dose-calculator">'+calc_title+'</h2><div class="dose-calculator" data-language="'+d['language']+'" data-regimens="'+calc_data+'"><noscript>'+('Включите JavaScript для расчёта дозы.' if d['language']=='ru' else 'Enable JavaScript to use the dose calculator.')+'</noscript></div>'+parser.finish()
         category_links = ' '.join('<a class="drug-category" href="/drugs/?category='+quote(c)+'">'+esc(c)+'</a>' for c in d['categories'])
         body = '<a class="back-link" href="/drugs/">'+tr('All drugs')+'</a>'
         if len(d['versions'])>1:
@@ -164,7 +166,7 @@ def build_drugs(root, output, frame, parser_type, safe_url, preview=False):
             body += '<p class="muted">'+tr('Last reviewed: ')+esc(d['reviewed'])+'</p>'
         facts = ''.join('<div class="drug-fact"><dt>'+esc(f.get('label'))+'</dt><dd>'+esc(f.get('value'))+'</dd></div>' for f in (d.get('quick_facts') or []) if f.get('label') and f.get('value'))
         body += '</div>'+('<dl class="drug-quick-facts">'+facts+'</dl>' if facts else '')
-        body += '<div class="drug-detail"><nav class="drug-tabs" aria-label="'+('Разделы препарата' if d['language']=='ru' else 'Drug sections')+'">'+''.join('<a href="#'+anchor+'">'+esc(title)+'</a>' for anchor,title,level in parser.toc if level==2)+'</nav><article class="article-body drug-body">'+content+'</article></div>'
+        body += '<div class="drug-detail"><nav class="drug-tabs" aria-label="'+('Разделы препарата' if d['language']=='ru' else 'Drug sections')+'"><a href="#dose-calculator">'+calc_title+'</a>'+''.join('<a href="#'+anchor+'">'+esc(title)+'</a>' for anchor,title,level in parser.toc if level==2)+'</nav><article class="article-body drug-body">'+content+'</article></div>'
 
         folder = target/d['slug']; folder.mkdir()
         (folder/'index.html').write_text(page(d['title']+' | '+tr('Drug information'),'/drugs/'+d['slug']+'/',body,d.get('summary') or d['title'],lang=d['language']))

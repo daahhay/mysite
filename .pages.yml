@@ -338,6 +338,63 @@ content:
         label: Short labels (route, population, use)
         type: string
         list: true
+      - name: calculator_regimens
+        label: Quick dose calculator — regimens
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{fields.label}"
+        description: "Add reviewed regimens for this language. Use a clear indication, patient group and route in the name. These are arithmetic conversions; eligibility, maximum doses and titration must be stated in the notes. Without regimens, readers can enter values manually."
+        fields:
+          - name: label
+            label: Regimen / patient group / route
+            type: string
+            required: true
+          - name: dose_min
+            label: Dose (or lower end of range)
+            type: number
+            required: true
+          - name: dose_max
+            label: Upper end of range (optional)
+            type: number
+          - name: dose_unit
+            label: Dose unit
+            type: select
+            default: mg
+            options:
+              values: [mg, mcg, units]
+          - name: per_kg
+            label: Dose is per kg
+            type: boolean
+            default: true
+          - name: time
+            label: Dose time basis
+            type: select
+            default: dose
+            options:
+              values:
+                - value: dose
+                  label: Single dose
+                - value: hour
+                  label: Per hour
+                - value: minute
+                  label: Per minute
+          - name: concentration
+            label: Final concentration (optional; amount per mL)
+            type: number
+          - name: concentration_unit
+            label: Concentration amount unit (per mL)
+            type: select
+            default: mg
+            options:
+              values: [mg, mcg, units]
+          - name: notes
+            label: Indication, restrictions, maximum dose and notes
+            type: text
+          - name: source
+            label: Regimen source URL
+            type: string
       - name: quick_facts
         label: Quick facts
         type: object
@@ -533,6 +590,63 @@ content:
             label: Short labels (route, population, use)
             type: string
             list: true
+          - name: calculator_regimens
+            label: Quick dose calculator — regimens
+            type: object
+            list:
+              collapsible:
+                collapsed: true
+                summary: "{fields.label}"
+            description: "Add reviewed regimens for this language. Use a clear indication, patient group and route in the name. These are arithmetic conversions; eligibility, maximum doses and titration must be stated in the notes. Without regimens, readers can enter values manually."
+            fields:
+              - name: label
+                label: Regimen / patient group / route
+                type: string
+                required: true
+              - name: dose_min
+                label: Dose (or lower end of range)
+                type: number
+                required: true
+              - name: dose_max
+                label: Upper end of range (optional)
+                type: number
+              - name: dose_unit
+                label: Dose unit
+                type: select
+                default: mg
+                options:
+                  values: [mg, mcg, units]
+              - name: per_kg
+                label: Dose is per kg
+                type: boolean
+                default: true
+              - name: time
+                label: Dose time basis
+                type: select
+                default: dose
+                options:
+                  values:
+                    - value: dose
+                      label: Single dose
+                    - value: hour
+                      label: Per hour
+                    - value: minute
+                      label: Per minute
+              - name: concentration
+                label: Final concentration (optional; amount per mL)
+                type: number
+              - name: concentration_unit
+                label: Concentration amount unit (per mL)
+                type: select
+                default: mg
+                options:
+                  values: [mg, mcg, units]
+              - name: notes
+                label: Indication, restrictions, maximum dose and notes
+                type: text
+              - name: source
+                label: Regimen source URL
+                type: string
           - name: quick_facts
             label: Quick facts
             type: object

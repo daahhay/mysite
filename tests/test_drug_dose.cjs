@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict');
+const {calculateDrugDose:c}=require('../drugs/drug-dose.js');
+const base={low:1,high:2,weight:70,perKg:true,unit:'mg',time:'dose',concentration:10,concentrationUnit:'mg'};
+assert.deepEqual(c(base),{total:[70,140],volume:[7,14],perHour:false});
+assert.deepEqual(c({...base,low:5,high:50,unit:'mcg',time:'minute'}),{total:[21000,210000],volume:[2.1,21],perHour:true});
+assert.deepEqual(c({...base,low:4,high:12,time:'hour'}),{total:[280,840],volume:[28,84],perHour:true});
+assert.deepEqual(c({...base,low:100,high:100,perKg:false,unit:'units',concentration:50,concentrationUnit:'units'}),{total:[100,100],volume:[2,2],perHour:false});
+assert.deepEqual(c({...base,perKg:false,weight:NaN,concentration:null}).total,[1,2]);
+assert.deepEqual(c({...base,low:1,high:1,perKg:false,concentration:1000,concentrationUnit:'mcg'}).volume,[1,1]);
+for(const changes of [{low:0},{low:-1},{low:NaN},{weight:0},{weight:Infinity},{high:0.5},{concentration:0},{concentration:-1},{concentrationUnit:'units'},{unit:'invalid'},{time:'day'},{low:1e308,high:1e308}])assert.throws(()=>c({...base,...changes}));
+console.log('Dose conversion checks passed');
